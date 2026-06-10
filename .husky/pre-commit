@@ -1,0 +1,10 @@
+# Secret scanning — 检测提交中是否包含密钥、证书等敏感信息
+# 如果 gitleaks 未安装则跳过（不影响提交）
+if command -v gitleaks &> /dev/null; then
+  gitleaks protect --staged --config .gitleaks.toml --verbose
+else
+  echo "[gitleaks] gitleaks 未安装，跳过密钥扫描（安装方式: brew install gitleaks）"
+fi
+
+# 代码格式 + Lint + 类型检查 + 相关测试
+npx lint-staged

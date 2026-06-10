@@ -1,0 +1,31 @@
+title = "wxpay-nodejs-sdk gitleaks config"
+
+[[rules]]
+id = "wechat-pay-api-v3-key"
+description = "WeChat Pay APIv3 Key (32-char hex)"
+regex = '''(?i)(apiV3Key|apiv3_key|api_v3_key)\s*[:=]\s*['"]?[0-9a-fA-F]{32}['"]?'''
+tags = ["wechatpay", "key"]
+
+[[rules]]
+id = "wechat-pay-mchid"
+description = "WeChat Pay Merchant ID"
+regex = '''(?i)(mchid|mch_id|partnerId|partner_id)\s*[:=]\s*['"]?1[0-9]{9}['"]?'''
+tags = ["wechatpay", "mchid"]
+
+[[rules]]
+id = "rsa-private-key-pem"
+description = "RSA Private Key (PEM format)"
+regex = '''-----BEGIN (RSA )?PRIVATE KEY-----'''
+tags = ["key", "crypto"]
+
+[[rules]]
+id = "certificate-serial-number"
+description = "WeChat Pay Certificate Serial Number"
+regex = '''(?i)(serialNo|serial_no|serial_number)\s*[:=]\s*['"]?[0-9A-Fa-f]{40}['"]?'''
+tags = ["wechatpay", "cert"]
+
+[allowlist]
+paths = [
+  '''tests/.*\.test\.ts''',
+  '''tests/.*\.ts''',
+]

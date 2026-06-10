@@ -1,0 +1,199 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Snapshot: Authorization 头格式 > 标准 Authorization 头 1`] = `"WECHATPAY2-SHA256-RSA2048 mchid="1900000100",nonce_str="nonceValue123",timestamp="1705305600",serial_no="5157F09EFDC096DE15EBE81A47057A7232F1B8E1",signature="signatureBase64==""`;
+
+exports[`Snapshot: Bridge 配置结构 > APP Bridge 配置结构 > APP bridge config keys 1`] = `
+[
+  "appId",
+  "nonceStr",
+  "packageValue",
+  "partnerId",
+  "prepayId",
+  "sign",
+  "timeStamp",
+]
+`;
+
+exports[`Snapshot: Bridge 配置结构 > APP Bridge 配置结构 > APP bridge config values 1`] = `
+{
+  "appId": "wx1234567890abcdef",
+  "packageValue": "Sign=WXPay",
+  "partnerId": "1900000100",
+}
+`;
+
+exports[`Snapshot: Bridge 配置结构 > JSAPI Bridge 配置结构（排除动态时间戳） > JSAPI bridge config keys 1`] = `
+[
+  "appId",
+  "nonceStr",
+  "package",
+  "paySign",
+  "signType",
+  "timeStamp",
+]
+`;
+
+exports[`Snapshot: Bridge 配置结构 > JSAPI Bridge 配置结构（排除动态时间戳） > JSAPI bridge config values (excl. dynamic) 1`] = `
+{
+  "appId": "wx1234567890abcdef",
+  "package": "prepay_id=wx201410272009395522657a690389285100",
+  "signType": "RSA",
+  "timeStamp": "1705305600",
+}
+`;
+
+exports[`Snapshot: Bridge 配置结构 > 商家转账 JSAPI Bridge 配置结构 > MerchantTransfer bridge config keys 1`] = `
+[
+  "appId",
+  "mchId",
+  "package",
+]
+`;
+
+exports[`Snapshot: Bridge 配置结构 > 小程序 Bridge 配置结构 > MiniProgram bridge config keys 1`] = `
+[
+  "nonceStr",
+  "package",
+  "paySign",
+  "signType",
+  "timeStamp",
+]
+`;
+
+exports[`Snapshot: Bridge 配置结构 > 支付分 JSAPI Bridge 配置结构 > PayScore JSAPI bridge config keys 1`] = `
+[
+  "appid",
+  "mchid",
+  "nonce_str",
+  "out_order_no",
+  "service_id",
+  "sign",
+  "sign_type",
+  "timestamp",
+]
+`;
+
+exports[`Snapshot: HTTP 请求头结构 > multipart/form-data 请求头 1`] = `
+{
+  "Accept": "application/json",
+  "Authorization": "WECHATPAY2-SHA256-RSA2048 mchid="1900000100"",
+  "Content-Type": "multipart/form-data",
+  "User-Agent": "wxpay-nodejs-sdk/0.1.0",
+}
+`;
+
+exports[`Snapshot: HTTP 请求头结构 > 带额外头部的请求头 1`] = `
+{
+  "Accept": "application/json",
+  "Authorization": "WECHATPAY2-SHA256-RSA2048 mchid="1900000100"",
+  "Content-Type": "application/json",
+  "Idempotency-Key": "key-12345",
+  "User-Agent": "wxpay-nodejs-sdk/0.1.0",
+  "Wechatpay-Serial": "CERT_SERIAL_NO",
+}
+`;
+
+exports[`Snapshot: HTTP 请求头结构 > 标准 JSON 请求头 1`] = `
+{
+  "Accept": "application/json",
+  "Authorization": "WECHATPAY2-SHA256-RSA2048 mchid="1900000100",nonce_str="abc123"",
+  "Content-Type": "application/json",
+  "User-Agent": "wxpay-nodejs-sdk/0.1.0",
+}
+`;
+
+exports[`Snapshot: JSON 请求体序列化 > JSAPI 下单请求体 1`] = `"{"appid":"wx8888888888888888","mchid":"1900000100","description":"Image形象店-深圳腾大-QQ公仔","out_trade_no":"1217752501201407033233368018","time_expire":"2018-06-08T10:34:56+08:00","attach":"自定义数据","notify_url":"https://www.weixin.qq.com/wxpay/pay.php","amount":{"total":100,"currency":"CNY"},"payer":{"openid":"oUpF8uMuAJO_M2pxb1Q9zNjWeS6o"}}"`;
+
+exports[`Snapshot: JSON 请求体序列化 > 分账请求体 1`] = `"{"transaction_id":"4208450740201411110007820472","out_order_no":"P20150806125346","unfreeze_unsplit":false,"receivers":[{"type":"MERCHANT_ID","account":"1900000109","name":"encrypted_name_base64","amount":100,"description":"分给商户A"}]}"`;
+
+exports[`Snapshot: JSON 请求体序列化 > 合单下单请求体 1`] = `"{"combine_appid":"wxd678efh567hg6787","combine_mchid":"1230000109","combine_out_trade_no":"1217752501201407033233368018","notify_url":"https://yourapp.com/notify","combine_payer_info":{"openid":"oUpF8uMuAJO_M2pxb1Q9zNjWeS6o"},"sub_orders":[{"mchid":"1230000109","out_trade_no":"20150806125346","description":"商品A","amount":{"total_amount":10,"currency":"CNY"}},{"mchid":"1230000110","out_trade_no":"20150806125347","description":"商品B","amount":{"total_amount":20,"currency":"CNY"}}]}"`;
+
+exports[`Snapshot: JSON 请求体序列化 > 退款请求体 1`] = `"{"transaction_id":"4200001234567890","out_refund_no":"REFUND20240101","reason":"商品已退货","amount":{"refund":100,"total":500,"currency":"CNY"}}"`;
+
+exports[`Snapshot: WxPayError 结构 > 客户端错误 (400) 1`] = `
+{
+  "detail": {
+    "code": "INVALID_REQUEST",
+    "detail": [
+      {
+        "field": "/amount/total",
+        "message": "金额不能为空",
+      },
+    ],
+    "message": "参数格式错误",
+  },
+  "headers": {
+    "request-id": "req-abc-123",
+    "wechatpay-serial": "CERT001",
+  },
+  "isClientError": true,
+  "isServerError": false,
+  "message": "[INVALID_REQUEST] 参数格式错误",
+  "name": "WxPayError",
+  "status": 400,
+}
+`;
+
+exports[`Snapshot: WxPayError 结构 > 服务端错误 (500) 1`] = `
+{
+  "detail": {
+    "code": "SYSTEM_ERROR",
+    "message": "系统错误，请稍后重试",
+  },
+  "isClientError": false,
+  "isServerError": true,
+  "message": "[SYSTEM_ERROR] 系统错误，请稍后重试",
+  "name": "WxPayError",
+  "status": 500,
+}
+`;
+
+exports[`Snapshot: WxPayError 结构 > 超时错误 1`] = `
+{
+  "detail": {
+    "code": "REQUEST_TIMEOUT",
+    "message": "请求超时 (30000ms)",
+  },
+  "isClientError": false,
+  "isServerError": false,
+  "message": "[REQUEST_TIMEOUT] 请求超时 (30000ms)",
+  "name": "WxPayError",
+  "status": 0,
+}
+`;
+
+exports[`Snapshot: 签名串格式 > GET 请求签名串格式 1`] = `
+"GET
+/v3/pay/transactions/id/4200001234567890
+1705305600
+abc123def456
+
+"
+`;
+
+exports[`Snapshot: 签名串格式 > POST 请求签名串格式（含请求体） 1`] = `
+"POST
+/v3/pay/transactions/jsapi
+1705305600
+xyz789abc012
+{"appid":"wx8888888888888888","mchid":"1900000100","description":"测试商品","out_trade_no":"ORDER20240101","amount":{"total":100,"currency":"CNY"},"payer":{"openid":"oUpF8uMuAJO_M2pxb1Q9zNjWeS6o"}}
+"
+`;
+
+exports[`Snapshot: 签名串格式 > PUT 请求签名串格式 1`] = `
+"PUT
+/v3/resource
+1705305600
+nonce12345
+{"amount":200}
+"
+`;
+
+exports[`Snapshot: 签名串格式 > 带查询参数的路径签名串格式 1`] = `
+"GET
+/v3/pay/transactions?mchid=1900000100&limit=10
+1705305600
+queryTest
+
+"
+`;
