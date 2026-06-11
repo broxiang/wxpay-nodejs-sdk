@@ -1,5 +1,19 @@
 export { WxPayClient, CertificateManager } from './core/index.js';
-export { WxPayError } from './utils/http.js';
+export {
+  WxPayError,
+  ServiceException,
+  ValidationException,
+  HttpException,
+  DecryptionException,
+  MalformedMessageException,
+} from './utils/exceptions.js';
+export {
+  registerSensitiveFields,
+  encryptSensitiveFields,
+  decryptSensitiveFields,
+  encryptSensitiveFieldsInArray,
+  decryptSensitiveFieldsInArray,
+} from './utils/sensitive.js';
 export { CertificateService } from './services/certificate.js';
 export type { DecryptedCertificate } from './services/certificate.js';
 export { JsapiService } from './services/jsapi.js';

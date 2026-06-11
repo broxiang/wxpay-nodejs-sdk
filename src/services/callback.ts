@@ -55,6 +55,14 @@ export type SignatureType = string;
  */
 const SUPPORTED_SIGNATURE_TYPES = new Set(['WECHATPAY2-SHA256-RSA2048']);
 
+/** 默认签名类型 */
+const DEFAULT_SIGNATURE_TYPE = 'WECHATPAY2-SHA256-RSA2048';
+
+/**
+ * 已知的加密算法常量
+ */
+const SUPPORTED_ALGORITHMS = new Set(['AEAD_AES_256_GCM']);
+
 /**
  * 微信支付回调通知处理器
  *
@@ -82,17 +90,30 @@ export class CallbackHandler {
    * @param headers - 回调请求头
    * @param body - 回调请求体（原始 JSON 字符串）
    * @returns 签名验证是否通过
-   * @throws 如果签名类型不支持或找不到对应的证书
+   * @throws 如果必填参数缺失、签名类型不支持或找不到对应的证书
    */
   verifySignature(headers: CallbackHeaders, body: string): boolean {
-    const signatureType = headers['wechatpay-signature-type'];
-    const serialNo = headers['wechatpay-serial'];
+    // 参数校验
+    if (!headers['wechatpay-serial']) {
+      throw new Error('回调头 wechatpay-serial 不能为空');
+    }
+    if (!headers['wechatpay-signature']) {
+      throw new Error('回调头 wechatpay-signature 不能为空');
+    }
+    if (!headers['wechatpay-timestamp']) {
+      throw new Error('回调头 wechatpay-timestamp 不能为空');
+    }
+    if (!headers['wechatpay-nonce']) {
+      throw new Error('回调头 wechatpay-nonce 不能为空');
+    }
 
-    // 目前仅支持 WECHATPAY2-SHA256-RSA2048 签名类型
-    if (signatureType && !SUPPORTED_SIGNATURE_TYPES.has(signatureType)) {
+    // 签名类型校验（缺失时使用默认值）
+    const signatureType = headers['wechatpay-signature-type'] ?? DEFAULT_SIGNATURE_TYPE;
+    if (!SUPPORTED_SIGNATURE_TYPES.has(signatureType)) {
       throw new Error(`不支持的签名类型: ${signatureType}`);
     }
 
+    const serialNo = headers['wechatpay-serial'];
     const publicKey = this.certificates.getPublicKey(serialNo);
     if (!publicKey) {
       throw new Error(`未找到序列号为 ${serialNo} 的平台证书，请确保已配置平台证书`);
@@ -114,10 +135,25 @@ export class CallbackHandler {
    *
    * @param notification - 回调通知 JSON 对象
    * @returns 解密后的业务数据
-   * @throws 如果解密后的数据为空或格式无效
+   * @throws 如果通知结构无效、算法不匹配或解密失败
    */
   decryptNotification<T = unknown>(notification: CallbackNotification): DecryptedCallback<T> {
     const { resource } = notification;
+
+    if (!resource.algorithm) {
+      throw new Error('回调通知 resource 缺少 algorithm 字段');
+    }
+    if (!resource.ciphertext) {
+      throw new Error('回调通知 resource 缺少 ciphertext 字段');
+    }
+    if (!resource.nonce) {
+      throw new Error('回调通知 resource 缺少 nonce 字段');
+    }
+
+    // 校验加密算法
+    if (!SUPPORTED_ALGORITHMS.has(resource.algorithm)) {
+      throw new Error(`不支持的加密算法: ${resource.algorithm}`);
+    }
 
     const plaintext = this.aesGcmDecrypt(
       resource.ciphertext,
@@ -454,10 +490,26 @@ export class CallbackHandler {
    * @param associatedData - 附加数据（用于 AEAD 认证）
    * @param nonce - 随机串
    * @returns 解密后的明文字符串
+   * @throws 如果密文格式无效或解密失败
    */
   private aesGcmDecrypt(ciphertext: string, associatedData: string, nonce: string): string {
+    if (!ciphertext) {
+      throw new Error('密文(ciphertext)不能为空');
+    }
+    if (!nonce) {
+      throw new Error('随机串(nonce)不能为空');
+    }
+    if (this.apiV3Key.length !== 32) {
+      throw new Error('APIv3 密钥无效，长度必须为 32 个字节');
+    }
+
     const key = Buffer.from(this.apiV3Key, 'utf-8');
     const ciphertextBuffer = Buffer.from(ciphertext, 'base64');
+
+    if (ciphertextBuffer.length <= 16) {
+      throw new Error('密文长度无效，必须大于 16 字节（含 AuthTag）');
+    }
+
     const authTag = ciphertextBuffer.subarray(-16);
     const encryptedData = ciphertextBuffer.subarray(0, -16);
 

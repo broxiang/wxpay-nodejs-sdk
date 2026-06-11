@@ -1,5 +1,14 @@
 import os from 'node:os';
-import type { WxPayResponse, WxPayErrorDetail } from '../types/index.js';
+import type { WxPayResponse } from '../types/index.js';
+import {
+  WxPayError,
+  ServiceException,
+  ValidationException,
+  MalformedMessageException,
+  type WxPayErrorDetail,
+} from './exceptions.js';
+
+export { WxPayError, ServiceException, ValidationException, MalformedMessageException };
 
 /** SDK 版本号，由 package.json 同步 */
 const SDK_VERSION = '0.2.1';
@@ -10,36 +19,6 @@ function getUserAgent(): string {
   const arch = os.arch();
   const nodeVersion = process.version;
   return `wxpay-nodejs-sdk/${SDK_VERSION} (${platform} ${arch}) Node.js/${nodeVersion}`;
-}
-
-/**
- * 微信支付 API V3 自定义错误类
- */
-export class WxPayError extends Error {
-  /** HTTP 状态码 */
-  public readonly status: number;
-  /** 错误响应头 */
-  public readonly headers: Record<string, string>;
-  /** 错误详情 */
-  public readonly detail: WxPayErrorDetail;
-
-  constructor(status: number, headers: Record<string, string>, detail: WxPayErrorDetail) {
-    super(`[${detail.code}] ${detail.message}`);
-    this.name = 'WxPayError';
-    this.status = status;
-    this.headers = headers;
-    this.detail = detail;
-  }
-
-  /** 是否为客户端错误 (4xx) */
-  get isClientError(): boolean {
-    return this.status >= 400 && this.status < 500;
-  }
-
-  /** 是否为服务端错误 (5xx) */
-  get isServerError(): boolean {
-    return this.status >= 500 && this.status < 600;
-  }
 }
 
 /**
@@ -163,7 +142,7 @@ export async function parseResponse<T>(
         message: `HTTP ${response.status}: ${response.statusText}`,
       };
     }
-    throw new WxPayError(response.status, headers, errorDetail);
+    throw new ServiceException(response.status, headers, errorDetail);
   }
 
   if (verify) {
@@ -175,10 +154,7 @@ export async function parseResponse<T>(
     if (signature && timestamp && nonce && serial) {
       const valid = verify(rawBody, signature, timestamp, nonce, serial);
       if (!valid) {
-        throw new WxPayError(response.status, headers, {
-          code: 'SIGN_ERROR',
-          message: '应答签名验证失败',
-        });
+        throw new ValidationException('应答签名验证失败');
       }
     }
   }
@@ -191,10 +167,9 @@ export async function parseResponse<T>(
     }
     data = parsed as T;
   } catch (error) {
-    throw new WxPayError(response.status, headers, {
-      code: 'PARSE_ERROR',
-      message: error instanceof Error ? error.message : '响应数据解析失败',
-    });
+    throw new MalformedMessageException(
+      error instanceof Error ? error.message : '响应数据解析失败',
+    );
   }
 
   return {

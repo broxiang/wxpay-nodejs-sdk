@@ -37,8 +37,15 @@ export function buildSignString(payload: SignPayload): string {
  * @param signString - 待签名字符串
  * @param privateKey - PEM 格式的商户 API 私钥
  * @returns Base64 编码的签名值
+ * @throws 如果 signString 或 privateKey 为空
  */
 export function sign(signString: string, privateKey: string | Buffer): string {
+  if (!signString) {
+    throw new Error('签名串不能为空');
+  }
+  if (!privateKey) {
+    throw new Error('商户私钥不能为空');
+  }
   const signer = crypto.createSign('RSA-SHA256');
   signer.update(signString);
   signer.end();
@@ -106,6 +113,8 @@ export function isTimestampValid(timestamp: string): boolean {
  * @param timestamp - HTTP 头 Wechatpay-Timestamp
  * @param nonce - HTTP 头 Wechatpay-Nonce
  * @param publicKey - 微信支付公钥或平台证书公钥（PEM 格式）
+ * @returns 验签是否通过
+ * @throws 如果必填参数缺失
  */
 export function verifySignature(
   body: string,
@@ -114,6 +123,18 @@ export function verifySignature(
   nonce: string,
   publicKey: string | Buffer,
 ): boolean {
+  if (!signature) {
+    throw new Error('签名值(signature)不能为空');
+  }
+  if (!timestamp) {
+    throw new Error('时间戳(timestamp)不能为空');
+  }
+  if (!nonce) {
+    throw new Error('随机串(nonce)不能为空');
+  }
+  if (!publicKey) {
+    throw new Error('公钥(publicKey)不能为空');
+  }
   if (!isTimestampValid(timestamp)) {
     return false;
   }
@@ -132,9 +153,16 @@ export function verifySignature(
  *
  * @param plaintext - 待加密的明文
  * @param publicKey - 微信支付公钥或平台证书公钥（PEM 格式）
- * @returns Base64 编码的密文
+ * @returns Base64 编码的密文，空字符串输入返回空字符串
+ * @throws 如果 publicKey 为空
  */
 export function oaepEncrypt(plaintext: string, publicKey: string | Buffer): string {
+  if (!publicKey) {
+    throw new Error('加密公钥不能为空');
+  }
+  if (!plaintext) {
+    return '';
+  }
   const encrypted = crypto.publicEncrypt(
     {
       key: publicKey,
@@ -154,9 +182,16 @@ export function oaepEncrypt(plaintext: string, publicKey: string | Buffer): stri
  *
  * @param ciphertext - Base64 编码的密文
  * @param privateKey - 商户 API 私钥（PEM 格式）
- * @returns 解密后的明文字符串
+ * @returns 解密后的明文字符串，空字符串输入返回空字符串
+ * @throws 如果 privateKey 为空或密文格式无效
  */
 export function oaepDecrypt(ciphertext: string, privateKey: string | Buffer): string {
+  if (!privateKey) {
+    throw new Error('解密私钥不能为空');
+  }
+  if (!ciphertext) {
+    return '';
+  }
   const decrypted = crypto.privateDecrypt(
     {
       key: privateKey,
