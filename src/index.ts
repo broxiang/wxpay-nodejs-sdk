@@ -60,4 +60,3 @@ export {
 } from './utils/sign.js';
 export type { SignPayload } from './utils/sign.js';
 export * from './types/index.js';
-// test comment

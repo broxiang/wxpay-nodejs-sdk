@@ -1,11 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BillService } from '../src/services/bill';
 import { WxPayClient } from '../src/core/client';
-import type {
-  TradeBillParams,
-  FundFlowBillParams,
-  ProfitSharingBillParams,
-} from '../src/types';
+import type { TradeBillParams, FundFlowBillParams, ProfitSharingBillParams } from '../src/types';
 
 // Mock the WxPayClient
 vi.mock('../src/core/client.js', () => ({
@@ -50,8 +46,7 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: '79bb0f45fc4c42234a918000b2668d689e2bde04',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
@@ -76,8 +71,7 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: '79bb0f45fc4c42234a918000b2668d689e2bde04',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
@@ -99,8 +93,7 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: 'abc123',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
@@ -121,8 +114,7 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: 'abc123',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
@@ -148,17 +140,13 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: '79bb0f45fc4c42234a918000b2668d689e2bde04',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=yyy',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=yyy',
         },
       });
 
       const result = await service.applyFundFlowBill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/bill/fundflowbill',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/fundflowbill', params);
       expect(result.status).toBe(200);
       expect(result.data.hash_type).toBe('SHA1');
     });
@@ -174,17 +162,13 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: 'abc123',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
       const result = await service.applyFundFlowBill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/bill/fundflowbill',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/fundflowbill', params);
       expect(result.status).toBe(200);
     });
 
@@ -200,17 +184,13 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: 'abc123',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
       await service.applyFundFlowBill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/bill/fundflowbill',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/fundflowbill', params);
     });
 
     it('should call GET /v3/bill/fundflowbill with FEES account_type', async () => {
@@ -225,17 +205,13 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: 'abc123',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
       await service.applyFundFlowBill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/bill/fundflowbill',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/fundflowbill', params);
     });
   });
 
@@ -254,17 +230,13 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: '79bb0f45fc4c42234a918000b2668d689e2bde04',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=zzz',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=zzz',
         },
       });
 
       const result = await service.applyProfitSharingBill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/bill/profitsharingbill',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/profitsharingbill', params);
       expect(result.status).toBe(200);
       expect(result.data.hash_type).toBe('SHA1');
     });
@@ -280,17 +252,13 @@ describe('BillService', () => {
         data: {
           hash_type: 'SHA1',
           hash_value: 'abc123',
-          download_url:
-            'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
+          download_url: 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx',
         },
       });
 
       const result = await service.applyProfitSharingBill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/bill/profitsharingbill',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/profitsharingbill', params);
       expect(result.status).toBe(200);
     });
   });
@@ -310,8 +278,7 @@ describe('BillService', () => {
         data: billContent,
       });
 
-      const downloadUrl =
-        'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx';
+      const downloadUrl = 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx';
 
       const result = await service.downloadBill(downloadUrl);
 
@@ -322,9 +289,7 @@ describe('BillService', () => {
     });
 
     it('should download GZIP compressed bill file', async () => {
-      const compressedContent = Buffer.from([
-        0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00,
-      ]);
+      const compressedContent = Buffer.from([0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00]);
 
       mockClient.downloadRaw.mockResolvedValue({
         status: 200,
@@ -332,8 +297,7 @@ describe('BillService', () => {
         data: compressedContent,
       });
 
-      const downloadUrl =
-        'https://api.mch.weixin.qq.com/v3/billdownload/file?token=yyy';
+      const downloadUrl = 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=yyy';
 
       const result = await service.downloadBill(downloadUrl);
 
@@ -347,8 +311,7 @@ describe('BillService', () => {
 
   describe('bill download flow', () => {
     it('should support complete flow: apply then download', async () => {
-      const downloadUrl =
-        'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx';
+      const downloadUrl = 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx';
       const billContent = Buffer.from('mock bill content', 'utf-8');
 
       mockClient.get.mockResolvedValue({
@@ -377,9 +340,7 @@ describe('BillService', () => {
       expect(applyResult.data.hash_value).toBeDefined();
 
       // Step 2: Download bill
-      const downloadResult = await service.downloadBill(
-        applyResult.data.download_url,
-      );
+      const downloadResult = await service.downloadBill(applyResult.data.download_url);
 
       expect(mockClient.downloadRaw).toHaveBeenCalledWith(downloadUrl);
       expect(Buffer.isBuffer(downloadResult.data)).toBe(true);

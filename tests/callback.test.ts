@@ -142,9 +142,7 @@ describe('CallbackHandler', () => {
         },
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320873',
@@ -190,9 +188,7 @@ describe('CallbackHandler', () => {
         },
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320873',
@@ -262,9 +258,7 @@ describe('CallbackHandler', () => {
         },
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320874',

@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PartnershipService } from '../../src/services/partnership';
 import { WxPayClient } from '../../src/core/client';
-import type {
-  BuildPartnershipRequest,
-  QueryPartnershipsParams,
-} from '../../src/types';
+import type { BuildPartnershipRequest, QueryPartnershipsParams } from '../../src/types';
 
 vi.mock('../../src/core/client.js', () => ({
   WxPayClient: vi.fn(),

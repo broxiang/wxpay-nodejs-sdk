@@ -163,10 +163,7 @@ export class CouponService {
   async queryStocks(
     params: QueryCouponStocksParams,
   ): Promise<WxPayResponse<QueryCouponStocksResponse>> {
-    return this.client.get<QueryCouponStocksResponse>(
-      '/v3/marketing/favor/stocks',
-      params,
-    );
+    return this.client.get<QueryCouponStocksResponse>('/v3/marketing/favor/stocks', params);
   }
 
   /**
@@ -183,10 +180,7 @@ export class CouponService {
     stockId: string,
     params: { stock_creator_mchid: string },
   ): Promise<WxPayResponse<CouponStockItem>> {
-    return this.client.get<CouponStockItem>(
-      `/v3/marketing/favor/stocks/${stockId}`,
-      params,
-    );
+    return this.client.get<CouponStockItem>(`/v3/marketing/favor/stocks/${stockId}`, params);
   }
 
   /**
@@ -287,9 +281,7 @@ export class CouponService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012463585
    */
-  async downloadUseFlow(
-    stockId: string,
-  ): Promise<WxPayResponse<DownloadCouponStockFlowResponse>> {
+  async downloadUseFlow(stockId: string): Promise<WxPayResponse<DownloadCouponStockFlowResponse>> {
     return this.client.get<DownloadCouponStockFlowResponse>(
       `/v3/marketing/favor/stocks/${stockId}/use-flow`,
     );
@@ -326,10 +318,7 @@ export class CouponService {
   async setCallback(
     request: SetCouponCallbackRequest,
   ): Promise<WxPayResponse<SetCouponCallbackResponse>> {
-    return this.client.post<SetCouponCallbackResponse>(
-      '/v3/marketing/favor/callbacks',
-      request,
-    );
+    return this.client.post<SetCouponCallbackResponse>('/v3/marketing/favor/callbacks', request);
   }
 
   /**
@@ -342,12 +331,7 @@ export class CouponService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012464070
    */
-  async queryCallback(
-    mchid: string,
-  ): Promise<WxPayResponse<SetCouponCallbackResponse>> {
-    return this.client.get<SetCouponCallbackResponse>(
-      '/v3/marketing/favor/callbacks',
-      { mchid },
-    );
+  async queryCallback(mchid: string): Promise<WxPayResponse<SetCouponCallbackResponse>> {
+    return this.client.get<SetCouponCallbackResponse>('/v3/marketing/favor/callbacks', { mchid });
   }
 }

@@ -40,9 +40,7 @@ export class BillService {
    * console.log(result.data.download_url);
    * ```
    */
-  async applyTradeBill(
-    params: TradeBillParams,
-  ): Promise<WxPayResponse<TradeBillResponse>> {
+  async applyTradeBill(params: TradeBillParams): Promise<WxPayResponse<TradeBillResponse>> {
     return this.client.get<TradeBillResponse>('/v3/bill/tradebill', {
       bill_date: params.bill_date,
       bill_type: params.bill_type,
@@ -100,13 +98,10 @@ export class BillService {
   async applyProfitSharingBill(
     params: ProfitSharingBillParams,
   ): Promise<WxPayResponse<ProfitSharingBillResponse>> {
-    return this.client.get<ProfitSharingBillResponse>(
-      '/v3/bill/profitsharingbill',
-      {
-        bill_date: params.bill_date,
-        tar_type: params.tar_type,
-      },
-    );
+    return this.client.get<ProfitSharingBillResponse>('/v3/bill/profitsharingbill', {
+      bill_date: params.bill_date,
+      tar_type: params.tar_type,
+    });
   }
 
   /**
@@ -143,9 +138,7 @@ export class BillService {
    * console.log(fileHash === applyResult.data.hash_value); // true
    * ```
    */
-  async downloadBill(
-    downloadUrl: string,
-  ): Promise<WxPayResponse<Buffer>> {
+  async downloadBill(downloadUrl: string): Promise<WxPayResponse<Buffer>> {
     return this.client.downloadRaw(downloadUrl);
   }
 }

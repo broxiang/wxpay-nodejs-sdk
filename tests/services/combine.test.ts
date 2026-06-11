@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CombineService } from '../../src/services/combine.js';
 import { WxPayClient } from '../../src/core/client.js';
-import type {
-  CreateCombineOrderRequest,
-  CloseCombineOrderRequest,
-} from '../../src/types/index.js';
+import type { CreateCombineOrderRequest, CloseCombineOrderRequest } from '../../src/types/index.js';
 
 // Mock the WxPayClient
 vi.mock('../../src/core/client.js', () => ({
@@ -74,10 +71,7 @@ describe('CombineService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/jsapi',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/jsapi', request);
       expect(result).toEqual(expectedResponse);
       expect(result.data.prepay_id).toBe('wx201410272009395522657a690389285100');
     });

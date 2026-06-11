@@ -63,17 +63,10 @@ describe('CallbackHandler - Parking', () => {
     const nonce = crypto.randomBytes(12).toString('utf-8').slice(0, 12);
     const key = Buffer.from(apiV3Key, 'utf-8');
 
-    const cipher = crypto.createCipheriv(
-      'aes-256-gcm',
-      key,
-      Buffer.from(nonce, 'utf-8'),
-    );
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, Buffer.from(nonce, 'utf-8'));
     cipher.setAAD(Buffer.from(associatedData, 'utf-8'));
 
-    const encrypted = Buffer.concat([
-      cipher.update(data, 'utf-8'),
-      cipher.final(),
-    ]);
+    const encrypted = Buffer.concat([cipher.update(data, 'utf-8'), cipher.final()]);
     const authTag = cipher.getAuthTag();
     const ciphertext = Buffer.concat([encrypted, authTag]).toString('base64');
 
@@ -263,9 +256,7 @@ describe('CallbackHandler - Parking', () => {
       expect(result.summary).toBe('支付成功');
       expect(result.data.trade_state).toBe('SUCCESS');
       expect(result.data.trade_scene).toBe('PARKING');
-      expect(result.data.parking_info?.parking_id).toBe(
-        '50000000002024060900000000001',
-      );
+      expect(result.data.parking_info?.parking_id).toBe('50000000002024060900000000001');
       expect(result.data.parking_info?.plate_number).toBe('粤B888888');
       expect(result.data.bank_type).toBe('BPA');
       expect(result.data.user_repaid).toBe('N');
@@ -355,10 +346,7 @@ describe('CallbackHandler - Parking', () => {
         },
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-        'refund',
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData), 'refund');
 
       const notification = {
         id: 'EV-20240609130030001',

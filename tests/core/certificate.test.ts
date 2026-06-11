@@ -8,7 +8,7 @@ describe('CertificateManager', () => {
   const apiV3Key = '0123456789abcdef0123456789abcdef'; // 32字节密钥
 
   // 生成测试用的 RSA 密钥对
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+  const { publicKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
     publicKeyEncoding: { type: 'spki', format: 'pem' },
     privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
@@ -28,18 +28,11 @@ describe('CertificateManager', () => {
     const key = Buffer.from(apiV3Key, 'utf-8');
     const nonceBuffer = Buffer.from(nonce, 'utf-8');
 
-    const cipher = crypto.createCipheriv(
-      'aes-256-gcm',
-      key,
-      nonceBuffer,
-    );
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, nonceBuffer);
 
     cipher.setAAD(Buffer.from(associatedData, 'utf-8'));
 
-    const encrypted = Buffer.concat([
-      cipher.update(content, 'utf-8'),
-      cipher.final(),
-    ]);
+    const encrypted = Buffer.concat([cipher.update(content, 'utf-8'), cipher.final()]);
 
     const authTag = cipher.getAuthTag();
 

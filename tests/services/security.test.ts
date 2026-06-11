@@ -43,10 +43,7 @@ describe('SecurityService', () => {
 
       const result = await service.echoTest(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/security/echo',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/security/echo', request);
       expect(result.status).toBe(200);
       expect(result.data.echo_message).toBe('Hello WeChat Pay');
       expect(result.data.encrypted_echo_message).toBeDefined();
@@ -69,10 +66,7 @@ describe('SecurityService', () => {
 
       const result = await service.echoTest(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/security/echo',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/security/echo', request);
       expect(result.data.echo_message).toBe('Test with callback');
     });
   });

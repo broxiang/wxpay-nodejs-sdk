@@ -49,10 +49,7 @@ describe('BusinessCircleService', () => {
 
       const result = await service.syncPoints(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/businesscircle/points/notify',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/businesscircle/points/notify', request);
       expect(result.status).toBe(204);
     });
 
@@ -72,10 +69,7 @@ describe('BusinessCircleService', () => {
 
       const result = await service.syncPoints(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/businesscircle/points/notify',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/businesscircle/points/notify', request);
       expect(result.status).toBe(204);
     });
   });
@@ -149,14 +143,11 @@ describe('BusinessCircleService', () => {
 
       const result = await service.queryPendingPoints(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/businesscircle/users/pending-points',
-        {
-          openid: 'oUpF8uMuAJO_M2pxb1Q9zNjWeS6o',
-          appid: 'wx8888888888888888',
-          transaction_id: '1217752501201407033233368018',
-        },
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/businesscircle/users/pending-points', {
+        openid: 'oUpF8uMuAJO_M2pxb1Q9zNjWeS6o',
+        appid: 'wx8888888888888888',
+        transaction_id: '1217752501201407033233368018',
+      });
       expect(result.data.total).toBe(100);
     });
   });
@@ -181,10 +172,7 @@ describe('BusinessCircleService', () => {
 
       const result = await service.syncParkingStatus(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/businesscircle/parkings',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/businesscircle/parkings', request);
       expect(result.status).toBe(204);
     });
 
@@ -206,10 +194,7 @@ describe('BusinessCircleService', () => {
 
       const result = await service.syncParkingStatus(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/businesscircle/parkings',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/businesscircle/parkings', request);
       expect(result.status).toBe(204);
     });
   });

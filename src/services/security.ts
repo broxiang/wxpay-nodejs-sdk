@@ -1,8 +1,5 @@
 import type { WxPayResponse } from '../types/index.js';
-import type {
-  EchoTestRequest,
-  EchoTestResponse,
-} from '../types/index.js';
+import type { EchoTestRequest, EchoTestResponse } from '../types/index.js';
 import { WxPayClient } from '../core/client.js';
 
 /**
@@ -32,12 +29,7 @@ export class SecurityService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4014551946
    */
-  async echoTest(
-    request: EchoTestRequest,
-  ): Promise<WxPayResponse<EchoTestResponse>> {
-    return this.client.post<EchoTestResponse>(
-      '/v3/security/echo',
-      request,
-    );
+  async echoTest(request: EchoTestRequest): Promise<WxPayResponse<EchoTestResponse>> {
+    return this.client.post<EchoTestResponse>('/v3/security/echo', request);
   }
 }

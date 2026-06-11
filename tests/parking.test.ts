@@ -64,10 +64,7 @@ describe('ParkingService', () => {
 
       const result = await service.createEntry(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/vehicle/parking/parkings',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/vehicle/parking/parkings', request);
       expect(result).toEqual(expectedResponse);
       expect(result.data.state).toBe('NORMAL');
       expect(result.data.id).toBe('50000000002024060900000000001');
@@ -134,15 +131,12 @@ describe('ParkingService', () => {
 
       const result = await service.queryPlateService(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/vehicle/parking/services/find',
-        {
-          appid: 'wxd678efh567hg6787',
-          plate_number: '粤B888888',
-          openid: 'oUpF8uMuAJO_M2pxb1Q9zNjWeS6o',
-          plate_color: 'BLUE',
-        },
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/vehicle/parking/services/find', {
+        appid: 'wxd678efh567hg6787',
+        plate_number: '粤B888888',
+        openid: 'oUpF8uMuAJO_M2pxb1Q9zNjWeS6o',
+        plate_color: 'BLUE',
+      });
       expect(result.data.service_state).toBe('NORMAL');
       expect(result.data.plate_number).toBe('粤B888888');
     });
@@ -235,10 +229,7 @@ describe('ParkingService', () => {
 
       const result = await service.createTransaction(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/vehicle/transactions/parking',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/vehicle/transactions/parking', request);
       expect(result.data.trade_state).toBe('ACCEPTED');
       expect(result.data.transaction_id).toBe('4200001234567890');
       expect(result.data.parking_info?.parking_id).toBe('50000000002024060900000000001');
@@ -340,10 +331,7 @@ describe('ParkingService', () => {
 
       const result = await service.applyRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.status).toBe('PROCESSING');
       expect(result.data.refund_id).toBe('50000000002024060900000000001');
       expect(result.data.amount.refund).toBe(1500);

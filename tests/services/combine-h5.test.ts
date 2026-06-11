@@ -82,10 +82,7 @@ describe('CombineH5Service', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/h5',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/h5', request);
       expect(result).toEqual(expectedResponse);
       expect(result.data.h5_url).toContain('prepay_id=');
     });
@@ -124,15 +121,14 @@ describe('CombineH5Service', () => {
       mockClient.post.mockResolvedValue({
         status: 200,
         headers: {},
-        data: { h5_url: 'https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx_ios_001' },
+        data: {
+          h5_url: 'https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx_ios_001',
+        },
       });
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/h5',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/h5', request);
       expect(result.data.h5_url).toBeDefined();
     });
 
@@ -170,15 +166,14 @@ describe('CombineH5Service', () => {
       mockClient.post.mockResolvedValue({
         status: 200,
         headers: {},
-        data: { h5_url: 'https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx_android_001' },
+        data: {
+          h5_url: 'https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx_android_001',
+        },
       });
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/h5',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/h5', request);
       expect(result.data.h5_url).toBeDefined();
     });
   });
@@ -393,10 +388,7 @@ describe('CombineH5Service', () => {
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.out_refund_no).toBe('REFUND_20240609_001');
       expect(result.data.status).toBe('PROCESSING');
     });

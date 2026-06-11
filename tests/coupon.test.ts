@@ -21,7 +21,7 @@ const mockClient = {
   post: mockPost,
   get: mockGet,
   mchid: '1900000001',
-} as any;
+} as unknown as import('../src/core/client.js').WxPayClient;
 
 describe('CouponService', () => {
   let service: CouponService;
@@ -67,10 +67,7 @@ describe('CouponService', () => {
 
       const result = await service.createStock(request);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/v3/marketing/favor/coupon-stocks',
-        request,
-      );
+      expect(mockPost).toHaveBeenCalledWith('/v3/marketing/favor/coupon-stocks', request);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -89,10 +86,7 @@ describe('CouponService', () => {
 
       const result = await service.activateStock('9856000', request);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000/start',
-        request,
-      );
+      expect(mockPost).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000/start', request);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -111,10 +105,7 @@ describe('CouponService', () => {
 
       const result = await service.pauseStock('9856000', request);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000/pause',
-        request,
-      );
+      expect(mockPost).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000/pause', request);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -133,10 +124,7 @@ describe('CouponService', () => {
 
       const result = await service.restartStock('9856000', request);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000/restart',
-        request,
-      );
+      expect(mockPost).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000/restart', request);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -157,10 +145,7 @@ describe('CouponService', () => {
       };
       mockPost.mockResolvedValue(mockResponse);
 
-      const result = await service.sendCoupon(
-        'o4GgauInH_RCEdvrrNGrntXDu6D4',
-        request,
-      );
+      const result = await service.sendCoupon('o4GgauInH_RCEdvrrNGrntXDu6D4', request);
 
       expect(mockPost).toHaveBeenCalledWith(
         '/v3/marketing/favor/users/o4GgauInH_RCEdvrrNGrntXDu6D4/coupons',
@@ -205,10 +190,7 @@ describe('CouponService', () => {
 
       const result = await service.queryStocks(params);
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks',
-        params,
-      );
+      expect(mockGet).toHaveBeenCalledWith('/v3/marketing/favor/stocks', params);
       expect(result).toEqual(mockResponse);
     });
 
@@ -226,10 +208,7 @@ describe('CouponService', () => {
 
       await service.queryStocks(params);
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks',
-        params,
-      );
+      expect(mockGet).toHaveBeenCalledWith('/v3/marketing/favor/stocks', params);
     });
   });
 
@@ -255,10 +234,9 @@ describe('CouponService', () => {
         stock_creator_mchid: '1900000001',
       });
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000',
-        { stock_creator_mchid: '1900000001' },
-      );
+      expect(mockGet).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000', {
+        stock_creator_mchid: '1900000001',
+      });
       expect(result).toEqual(mockResponse);
     });
   });
@@ -322,10 +300,7 @@ describe('CouponService', () => {
 
       const result = await service.queryStockMerchants('9856000', params);
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000/merchants',
-        params,
-      );
+      expect(mockGet).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000/merchants', params);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -349,10 +324,7 @@ describe('CouponService', () => {
 
       const result = await service.queryStockItems('9856000', params);
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000/items',
-        params,
-      );
+      expect(mockGet).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000/items', params);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -388,10 +360,7 @@ describe('CouponService', () => {
       };
       mockGet.mockResolvedValue(mockResponse);
 
-      const result = await service.queryUserCoupons(
-        'o4GgauInH_RCEdvrrNGrntXDu6D4',
-        params,
-      );
+      const result = await service.queryUserCoupons('o4GgauInH_RCEdvrrNGrntXDu6D4', params);
 
       expect(mockGet).toHaveBeenCalledWith(
         '/v3/marketing/favor/users/o4GgauInH_RCEdvrrNGrntXDu6D4/coupons',
@@ -433,9 +402,7 @@ describe('CouponService', () => {
 
       const result = await service.downloadUseFlow('9856000');
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000/use-flow',
-      );
+      expect(mockGet).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000/use-flow');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -451,9 +418,7 @@ describe('CouponService', () => {
 
       const result = await service.downloadRefundFlow('9856000');
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/v3/marketing/favor/stocks/9856000/refund-flow',
-      );
+      expect(mockGet).toHaveBeenCalledWith('/v3/marketing/favor/stocks/9856000/refund-flow');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -475,10 +440,7 @@ describe('CouponService', () => {
 
       const result = await service.setCallback(request);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/v3/marketing/favor/callbacks',
-        request,
-      );
+      expect(mockPost).toHaveBeenCalledWith('/v3/marketing/favor/callbacks', request);
       expect(result).toEqual(mockResponse);
     });
 
@@ -496,10 +458,7 @@ describe('CouponService', () => {
 
       await service.setCallback(request);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/v3/marketing/favor/callbacks',
-        request,
-      );
+      expect(mockPost).toHaveBeenCalledWith('/v3/marketing/favor/callbacks', request);
     });
   });
 });

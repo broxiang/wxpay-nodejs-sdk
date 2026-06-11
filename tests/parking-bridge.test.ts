@@ -14,12 +14,7 @@ describe('Parking Bridge Configs', () => {
 
   describe('buildParkingMiniProgramBridgeConfig', () => {
     it('should return correct mini program config', () => {
-      const config = buildParkingMiniProgramBridgeConfig(
-        mchid,
-        openid,
-        plateNumber,
-        plateColor,
-      );
+      const config = buildParkingMiniProgramBridgeConfig(mchid, openid, plateNumber, plateColor);
 
       expect(config.appId).toBe('wxbcad394b3d99dac9');
       expect(config.path).toBe('/pages/auth-creditpay/auth-creditpay');
@@ -31,12 +26,7 @@ describe('Parking Bridge Configs', () => {
     });
 
     it('should support different plate colors', () => {
-      const config = buildParkingMiniProgramBridgeConfig(
-        mchid,
-        openid,
-        '粤B999999',
-        'GREEN',
-      );
+      const config = buildParkingMiniProgramBridgeConfig(mchid, openid, '粤B999999', 'GREEN');
 
       expect(config.extraData.plate_color).toBe('GREEN');
       expect(config.extraData.plate_number).toBe('粤B999999');
@@ -45,12 +35,7 @@ describe('Parking Bridge Configs', () => {
 
   describe('buildParkingH5BridgeUrl', () => {
     it('should return correct H5 bridge URL path', () => {
-      const url = buildParkingH5BridgeUrl(
-        mchid,
-        openid,
-        plateNumber,
-        plateColor,
-      );
+      const url = buildParkingH5BridgeUrl(mchid, openid, plateNumber, plateColor);
 
       expect(url).toContain('/pages/auth-creditpay/auth-creditpay?');
       expect(url).toContain(`mchid=${mchid}`);
@@ -61,12 +46,7 @@ describe('Parking Bridge Configs', () => {
     });
 
     it('should properly encode special characters in plate number', () => {
-      const url = buildParkingH5BridgeUrl(
-        mchid,
-        openid,
-        '京A·12345',
-        'YELLOW',
-      );
+      const url = buildParkingH5BridgeUrl(mchid, openid, '京A·12345', 'YELLOW');
 
       expect(url).toContain(`plate_number=${encodeURIComponent('京A·12345')}`);
       expect(url).toContain('plate_color=YELLOW');
@@ -75,12 +55,7 @@ describe('Parking Bridge Configs', () => {
 
   describe('buildParkingAppBridgePath', () => {
     it('should return correct App bridge path', () => {
-      const path = buildParkingAppBridgePath(
-        mchid,
-        openid,
-        plateNumber,
-        plateColor,
-      );
+      const path = buildParkingAppBridgePath(mchid, openid, plateNumber, plateColor);
 
       expect(path).toContain('/pages/auth-creditpay/auth-creditpay?');
       expect(path).toContain(`mchid=${mchid}`);

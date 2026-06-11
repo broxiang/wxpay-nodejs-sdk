@@ -36,20 +36,8 @@ describe('JSAPI Bridge', () => {
     });
 
     it('should produce different signatures for different inputs', () => {
-      const paySign1 = generatePaySign(
-        'wxapp1',
-        '1628755080',
-        'nonce1',
-        'prepay1',
-        privateKey,
-      );
-      const paySign2 = generatePaySign(
-        'wxapp2',
-        '1628755081',
-        'nonce2',
-        'prepay2',
-        privateKey,
-      );
+      const paySign1 = generatePaySign('wxapp1', '1628755080', 'nonce1', 'prepay1', privateKey);
+      const paySign2 = generatePaySign('wxapp2', '1628755081', 'nonce2', 'prepay2', privateKey);
 
       expect(paySign1).not.toBe(paySign2);
     });

@@ -9,10 +9,14 @@ import {
 
 describe('WxPayError', () => {
   it('should create error with status and detail', () => {
-    const error = new WxPayError(400, {}, {
-      code: 'INVALID_REQUEST',
-      message: '参数错误',
-    });
+    const error = new WxPayError(
+      400,
+      {},
+      {
+        code: 'INVALID_REQUEST',
+        message: '参数错误',
+      },
+    );
 
     expect(error.name).toBe('WxPayError');
     expect(error.status).toBe(400);
@@ -65,16 +69,18 @@ describe('WxPayError', () => {
   });
 
   it('should include detail array if present', () => {
-    const error = new WxPayError(400, {}, {
-      code: 'INVALID_REQUEST',
-      message: '参数错误',
-      detail: [
-        { field: 'amount', message: '金额不能为空' },
-      ],
-    });
+    const error = new WxPayError(
+      400,
+      {},
+      {
+        code: 'INVALID_REQUEST',
+        message: '参数错误',
+        detail: [{ field: 'amount', message: '金额不能为空' }],
+      },
+    );
 
     expect(error.detail.detail).toHaveLength(1);
-    expect(error.detail.detail![0].field).toBe('amount');
+    expect(error.detail.detail?.[0]?.field).toBe('amount');
   });
 });
 

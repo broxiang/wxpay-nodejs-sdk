@@ -57,9 +57,7 @@ export class PartnershipService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012380536
    */
-  async list(
-    params: QueryPartnershipsParams,
-  ): Promise<WxPayResponse<QueryPartnershipsResponse>> {
+  async list(params: QueryPartnershipsParams): Promise<WxPayResponse<QueryPartnershipsResponse>> {
     const queryParams: Record<string, string | number | boolean | undefined> = {
       'authorized_data.business_type': params.authorized_data.business_type,
     };
@@ -81,9 +79,6 @@ export class PartnershipService {
     if (params.offset !== undefined) {
       queryParams['offset'] = params.offset;
     }
-    return this.client.get<QueryPartnershipsResponse>(
-      '/v3/marketing/partnerships',
-      queryParams,
-    );
+    return this.client.get<QueryPartnershipsResponse>('/v3/marketing/partnerships', queryParams);
   }
 }

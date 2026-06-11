@@ -113,10 +113,7 @@ describe('SmartGuideService', () => {
 
       const result = await service.register(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/smartguide/guides',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/smartguide/guides', request);
       expect(result.data.guide_id).toBe('GUIDE001');
     });
   });
@@ -138,10 +135,7 @@ describe('SmartGuideService', () => {
 
       const result = await service.update('GUIDE001', request);
 
-      expect(mockClient.patch).toHaveBeenCalledWith(
-        '/v3/smartguide/guides/GUIDE001',
-        request,
-      );
+      expect(mockClient.patch).toHaveBeenCalledWith('/v3/smartguide/guides/GUIDE001', request);
       expect(result.status).toBe(204);
     });
   });

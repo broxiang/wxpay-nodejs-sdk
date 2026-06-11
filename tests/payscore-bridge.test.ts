@@ -111,13 +111,9 @@ describe('PayScore Bridge', () => {
 
       // Verify the signature
       const packageStr = `service_id=${serviceId}&out_order_no=${outOrderNo}&need_sign_type=RSA`;
-      const expectedSignString = [
-        appId,
-        config.timestamp,
-        config.nonce_str,
-        packageStr,
-        '',
-      ].join('\n');
+      const expectedSignString = [appId, config.timestamp, config.nonce_str, packageStr, ''].join(
+        '\n',
+      );
       const verifier = crypto.createVerify('RSA-SHA256');
       verifier.update(expectedSignString);
       verifier.end();
@@ -147,13 +143,9 @@ describe('PayScore Bridge', () => {
 
       // Verify the signature still uses appId
       const packageStr = `service_id=${serviceId}&out_order_no=${outOrderNo}&need_sign_type=RSA`;
-      const expectedSignString = [
-        appId,
-        config.timestamp,
-        config.nonce_str,
-        packageStr,
-        '',
-      ].join('\n');
+      const expectedSignString = [appId, config.timestamp, config.nonce_str, packageStr, ''].join(
+        '\n',
+      );
       const verifier = crypto.createVerify('RSA-SHA256');
       verifier.update(expectedSignString);
       verifier.end();
@@ -171,13 +163,9 @@ describe('PayScore Bridge', () => {
 
       // Verify with appId included
       const packageStr = `service_id=${serviceId}&out_order_no=${outOrderNo}&need_sign_type=RSA`;
-      const expectedSignString = [
-        appId,
-        config.timestamp,
-        config.nonce_str,
-        packageStr,
-        '',
-      ].join('\n');
+      const expectedSignString = [appId, config.timestamp, config.nonce_str, packageStr, ''].join(
+        '\n',
+      );
       const verifier = crypto.createVerify('RSA-SHA256');
       verifier.update(expectedSignString);
       verifier.end();
@@ -187,13 +175,7 @@ describe('PayScore Bridge', () => {
 
   describe('buildPayScoreAppBridgeConfig', () => {
     it('should return a complete APP bridge config', () => {
-      const config = buildPayScoreAppBridgeConfig(
-        appId,
-        mchId,
-        serviceId,
-        outOrderNo,
-        privateKey,
-      );
+      const config = buildPayScoreAppBridgeConfig(appId, mchId, serviceId, outOrderNo, privateKey);
 
       expect(config.appid).toBe(appId);
       expect(config.mchid).toBe(mchId);
@@ -206,13 +188,9 @@ describe('PayScore Bridge', () => {
 
       // Verify the signature
       const packageStr = `service_id=${serviceId}&out_order_no=${outOrderNo}&need_sign_type=RSA`;
-      const expectedSignString = [
-        appId,
-        config.timestamp,
-        config.nonce_str,
-        packageStr,
-        '',
-      ].join('\n');
+      const expectedSignString = [appId, config.timestamp, config.nonce_str, packageStr, ''].join(
+        '\n',
+      );
       const verifier = crypto.createVerify('RSA-SHA256');
       verifier.update(expectedSignString);
       verifier.end();

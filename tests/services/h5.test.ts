@@ -61,15 +61,15 @@ describe('H5Service', () => {
       mockClient.post.mockResolvedValue({
         status: 200,
         headers: {},
-        data: { h5_url: 'https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx201410272009395522657a690389285100' },
+        data: {
+          h5_url:
+            'https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx201410272009395522657a690389285100',
+        },
       });
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/pay/transactions/h5',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/pay/transactions/h5', request);
       expect(result.status).toBe(200);
       expect(result.data.h5_url).toContain('https://wx.tenpay.com');
     });
@@ -99,10 +99,7 @@ describe('H5Service', () => {
 
       await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/pay/transactions/h5',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/pay/transactions/h5', request);
     });
 
     it('should create H5 order with Android scene_info', async () => {
@@ -130,10 +127,7 @@ describe('H5Service', () => {
 
       await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/pay/transactions/h5',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/pay/transactions/h5', request);
     });
   });
 
@@ -248,10 +242,7 @@ describe('H5Service', () => {
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.status).toBe('PROCESSING');
     });
 
@@ -278,10 +269,7 @@ describe('H5Service', () => {
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.status).toBe('SUCCESS');
     });
   });
@@ -306,9 +294,7 @@ describe('H5Service', () => {
 
       const result = await service.queryRefund(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds/R20240115000001',
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/refund/domestic/refunds/R20240115000001');
       expect(result.data.status).toBe('SUCCESS');
     });
   });
@@ -333,10 +319,7 @@ describe('H5Service', () => {
         },
       });
 
-      const result = await service.applyAbnormalRefund(
-        '50000000382019052709732678869',
-        request,
-      );
+      const result = await service.applyAbnormalRefund('50000000382019052709732678869', request);
 
       expect(mockClient.post).toHaveBeenCalledWith(
         '/v3/refund/domestic/refunds/50000000382019052709732678869/apply-abnormal-refund',

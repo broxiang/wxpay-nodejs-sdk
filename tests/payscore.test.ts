@@ -110,10 +110,7 @@ describe('PayScoreService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/payscore/serviceorder',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/payscore/serviceorder', request);
       expect(result).toEqual(expectedResponse);
       expect(result.data.state).toBe('CREATED');
       expect(result.data.package).toBe('xxxxxxxxxxxxxxxx');
@@ -167,14 +164,11 @@ describe('PayScoreService', () => {
 
       const result = await service.queryOrder(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/payscore/serviceorder',
-        {
-          service_id: '2002000000000558128851361561536',
-          appid: 'wxd678efh567hg6787',
-          out_order_no: '1234323JKHDFE1243252',
-        },
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/payscore/serviceorder', {
+        service_id: '2002000000000558128851361561536',
+        appid: 'wxd678efh567hg6787',
+        out_order_no: '1234323JKHDFE1243252',
+      });
       expect(result.data.state).toBe('DOING');
     });
 
@@ -193,14 +187,11 @@ describe('PayScoreService', () => {
 
       await service.queryOrder(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/payscore/serviceorder',
-        {
-          service_id: '2002000000000558128851361561536',
-          appid: 'wxd678efh567hg6787',
-          query_id: '15646546545165651651',
-        },
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/payscore/serviceorder', {
+        service_id: '2002000000000558128851361561536',
+        appid: 'wxd678efh567hg6787',
+        query_id: '15646546545165651651',
+      });
     });
   });
 

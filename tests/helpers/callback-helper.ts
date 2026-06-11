@@ -55,17 +55,10 @@ export function createCallbackTestHelper(apiV3Key = '0123456789abcdef0123456789a
     const nonce = crypto.randomBytes(12).toString('utf-8').slice(0, 12);
     const key = Buffer.from(apiV3Key, 'utf-8');
 
-    const cipher = crypto.createCipheriv(
-      'aes-256-gcm',
-      key,
-      Buffer.from(nonce, 'utf-8'),
-    );
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, Buffer.from(nonce, 'utf-8'));
     cipher.setAAD(Buffer.from(associatedData, 'utf-8'));
 
-    const encrypted = Buffer.concat([
-      cipher.update(data, 'utf-8'),
-      cipher.final(),
-    ]);
+    const encrypted = Buffer.concat([cipher.update(data, 'utf-8'), cipher.final()]);
     const authTag = cipher.getAuthTag();
     const ciphertext = Buffer.concat([encrypted, authTag]).toString('base64');
 
@@ -78,10 +71,7 @@ export function createCallbackTestHelper(apiV3Key = '0123456789abcdef0123456789a
     summary: string,
     associatedData = 'transaction',
   ) {
-    const { ciphertext, nonce } = encryptData(
-      JSON.stringify(data),
-      associatedData,
-    );
+    const { ciphertext, nonce } = encryptData(JSON.stringify(data), associatedData);
 
     return {
       notification: {
@@ -111,17 +101,12 @@ export function createCallbackTestHelper(apiV3Key = '0123456789abcdef0123456789a
     methodName: keyof CallbackHandler,
     associatedData = 'transaction',
   ) {
-    const { notification } = createNotification(
-      data,
-      eventType,
-      summary,
-      associatedData,
-    );
+    const { notification } = createNotification(data, eventType, summary, associatedData);
 
     const body = JSON.stringify(notification);
     const { signature, timestamp, nonce: signNonce } = signBody(body);
 
-    const method = handler[methodName] as Function;
+    const method = handler[methodName] as (...args: unknown[]) => unknown;
     return method.call(
       handler,
       {

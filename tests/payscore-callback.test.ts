@@ -116,9 +116,7 @@ describe('CallbackHandler - PayScore', () => {
         need_collection: true,
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320873',
@@ -229,9 +227,7 @@ describe('CallbackHandler - PayScore', () => {
         ],
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320874',
@@ -295,9 +291,7 @@ describe('CallbackHandler - PayScore', () => {
         },
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320875',
@@ -349,9 +343,7 @@ describe('CallbackHandler - PayScore', () => {
         },
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320876',
@@ -401,9 +393,7 @@ describe('CallbackHandler - PayScore', () => {
         },
       };
 
-      const { ciphertext, nonce, associatedData } = encryptData(
-        JSON.stringify(testData),
-      );
+      const { ciphertext, nonce, associatedData } = encryptData(JSON.stringify(testData));
 
       const notification = {
         id: 'EV-2018022511223320877',

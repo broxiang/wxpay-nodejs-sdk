@@ -74,10 +74,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/profitsharing/orders',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/profitsharing/orders', request);
       expect(result.data.state).toBe('PROCESSING');
       expect(result.data.order_id).toBe('1217752501201407033233368018');
     });
@@ -119,10 +116,9 @@ describe('ProfitSharingService', () => {
 
       const result = await service.queryOrder(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/profitsharing/orders/P20150806125346',
-        { transaction_id: '4208450740201411110007820472' },
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/profitsharing/orders/P20150806125346', {
+        transaction_id: '4208450740201411110007820472',
+      });
       expect(result.data.state).toBe('FINISHED');
       expect(result.data.receivers).toHaveLength(1);
     });
@@ -161,10 +157,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.createReturnOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/profitsharing/return-orders',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/profitsharing/return-orders', request);
       expect(result.data.result).toBe('SUCCESS');
       expect(result.data.return_id).toBe('1217752501201407033233368019');
     });
@@ -199,10 +192,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.createReturnOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/profitsharing/return-orders',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/profitsharing/return-orders', request);
       expect(result.data.result).toBe('PROCESSING');
     });
   });
@@ -271,10 +261,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.unfreeze(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/profitsharing/orders/unfreeze',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/profitsharing/orders/unfreeze', request);
       expect(result.data.state).toBe('FINISHED');
       expect(result.data.unfreeze_amount).toBe(500);
     });
@@ -332,10 +319,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.addReceiver(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/profitsharing/receivers/add',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/profitsharing/receivers/add', request);
       expect(result.data.type).toBe('MERCHANT_ID');
       expect(result.data.account).toBe('1900000109');
     });
@@ -364,10 +348,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.deleteReceiver(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/profitsharing/receivers/delete',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/profitsharing/receivers/delete', request);
       expect(result.data.type).toBe('MERCHANT_ID');
       expect(result.data.account).toBe('1900000109');
     });
@@ -396,10 +377,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.bill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/profitsharing/bills',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/profitsharing/bills', params);
       expect(result.data.hash_type).toBe('SHA1');
       expect(result.data.download_url).toBeTruthy();
     });
@@ -423,10 +401,7 @@ describe('ProfitSharingService', () => {
 
       const result = await service.bill(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/profitsharing/bills',
-        params,
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/profitsharing/bills', params);
       expect(result.data.download_url).toBeTruthy();
     });
   });

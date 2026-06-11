@@ -54,10 +54,7 @@ export class PayScoreService {
   async createOrder(
     request: CreatePayScoreOrderRequest,
   ): Promise<WxPayResponse<CreatePayScoreOrderResponse>> {
-    return this.client.post<CreatePayScoreOrderResponse>(
-      '/v3/payscore/serviceorder',
-      request,
-    );
+    return this.client.post<CreatePayScoreOrderResponse>('/v3/payscore/serviceorder', request);
   }
 
   /**
@@ -81,10 +78,7 @@ export class PayScoreService {
     if (params.query_id) {
       queryParams['query_id'] = params.query_id;
     }
-    return this.client.get<QueryPayScoreOrderResponse>(
-      '/v3/payscore/serviceorder',
-      queryParams,
-    );
+    return this.client.get<QueryPayScoreOrderResponse>('/v3/payscore/serviceorder', queryParams);
   }
 
   /**
@@ -193,13 +187,8 @@ export class PayScoreService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012587971
    */
-  async applyRefund(
-    request: CreateRefundRequest,
-  ): Promise<WxPayResponse<CreateRefundResponse>> {
-    return this.client.post<CreateRefundResponse>(
-      '/v3/refund/domestic/refunds',
-      request,
-    );
+  async applyRefund(request: CreateRefundRequest): Promise<WxPayResponse<CreateRefundResponse>> {
+    return this.client.post<CreateRefundResponse>('/v3/refund/domestic/refunds', request);
   }
 
   /**
@@ -212,11 +201,7 @@ export class PayScoreService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012587973
    */
-  async queryRefund(
-    outRefundNo: string,
-  ): Promise<WxPayResponse<CreateRefundResponse>> {
-    return this.client.get<CreateRefundResponse>(
-      `/v3/refund/domestic/refunds/${outRefundNo}`,
-    );
+  async queryRefund(outRefundNo: string): Promise<WxPayResponse<CreateRefundResponse>> {
+    return this.client.get<CreateRefundResponse>(`/v3/refund/domestic/refunds/${outRefundNo}`);
   }
 }

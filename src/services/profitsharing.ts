@@ -58,10 +58,7 @@ export class ProfitSharingService {
   async createOrder(
     request: CreateProfitSharingOrderRequest,
   ): Promise<WxPayResponse<CreateProfitSharingOrderResponse>> {
-    return this.client.post<CreateProfitSharingOrderResponse>(
-      '/v3/profitsharing/orders',
-      request,
-    );
+    return this.client.post<CreateProfitSharingOrderResponse>('/v3/profitsharing/orders', request);
   }
 
   /**
@@ -207,13 +204,8 @@ export class ProfitSharingService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012529628
    */
-  async bill(
-    params: ProfitSharingBillParams,
-  ): Promise<WxPayResponse<ProfitSharingBillResponse>> {
-    return this.client.get<ProfitSharingBillResponse>(
-      '/v3/profitsharing/bills',
-      params,
-    );
+  async bill(params: ProfitSharingBillParams): Promise<WxPayResponse<ProfitSharingBillResponse>> {
+    return this.client.get<ProfitSharingBillResponse>('/v3/profitsharing/bills', params);
   }
 
   /**

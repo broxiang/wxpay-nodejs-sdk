@@ -60,10 +60,7 @@ describe('NativeService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/pay/transactions/native',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/pay/transactions/native', request);
       expect(result.status).toBe(200);
       expect(result.data.code_url).toContain('weixin://wxpay/bizpayurl');
     });
@@ -90,10 +87,7 @@ describe('NativeService', () => {
 
       await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/pay/transactions/native',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/pay/transactions/native', request);
     });
 
     it('should create order with goods_tag', async () => {
@@ -115,10 +109,7 @@ describe('NativeService', () => {
 
       await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/pay/transactions/native',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/pay/transactions/native', request);
     });
   });
 
@@ -271,10 +262,7 @@ describe('NativeService', () => {
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.status).toBe('PROCESSING');
     });
 
@@ -301,10 +289,7 @@ describe('NativeService', () => {
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.status).toBe('SUCCESS');
     });
 
@@ -331,10 +316,7 @@ describe('NativeService', () => {
 
       await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
     });
   });
 
@@ -358,9 +340,7 @@ describe('NativeService', () => {
 
       const result = await service.queryRefund(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds/R20240115000001',
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/refund/domestic/refunds/R20240115000001');
       expect(result.data.status).toBe('SUCCESS');
     });
 
@@ -405,10 +385,7 @@ describe('NativeService', () => {
         },
       });
 
-      const result = await service.applyAbnormalRefund(
-        '50000000382019052709732678869',
-        request,
-      );
+      const result = await service.applyAbnormalRefund('50000000382019052709732678869', request);
 
       expect(mockClient.post).toHaveBeenCalledWith(
         '/v3/refund/domestic/refunds/50000000382019052709732678869/apply-abnormal-refund',
@@ -434,10 +411,7 @@ describe('NativeService', () => {
         },
       });
 
-      const result = await service.applyAbnormalRefund(
-        '50000000382019052709732678870',
-        request,
-      );
+      const result = await service.applyAbnormalRefund('50000000382019052709732678870', request);
 
       expect(mockClient.post).toHaveBeenCalledWith(
         '/v3/refund/domestic/refunds/50000000382019052709732678870/apply-abnormal-refund',

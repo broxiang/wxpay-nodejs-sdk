@@ -21,7 +21,7 @@ const mockClient = {
   post: mockPost,
   get: mockGet,
   mchid: '1900000001',
-} as any;
+} as unknown as import('../src/core/client.js').WxPayClient;
 
 describe('MerchantTransferService', () => {
   let service: MerchantTransferService;
@@ -40,9 +40,7 @@ describe('MerchantTransferService', () => {
         openid: 'o-MYE42l80oelYMDE34nYD456Xoy',
         transfer_amount: 400000,
         transfer_remark: '新会员开通有礼',
-        transfer_scene_report_infos: [
-          { info_type: '活动名称', info_content: '新会员有礼' },
-        ],
+        transfer_scene_report_infos: [{ info_type: '活动名称', info_content: '新会员有礼' }],
       };
 
       const mockResponse = {
@@ -55,10 +53,7 @@ describe('MerchantTransferService', () => {
 
       const result = await service.createTransfer(request);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/v3/fund-app/mch-transfer/transfer-bills',
-        request,
-      );
+      expect(mockPost).toHaveBeenCalledWith('/v3/fund-app/mch-transfer/transfer-bills', request);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -304,9 +299,7 @@ describe('MerchantTransferService', () => {
       };
       mockGet.mockResolvedValue(mockResponse);
 
-      const result = await service.queryAuthorizationByOutAuthorizationNo(
-        'auth_2020042013',
-      );
+      const result = await service.queryAuthorizationByOutAuthorizationNo('auth_2020042013');
 
       expect(mockGet).toHaveBeenCalledWith(
         '/v3/fund-app/mch-transfer/user-confirm-authorization/out-authorization-no/auth_2020042013',
@@ -326,10 +319,9 @@ describe('MerchantTransferService', () => {
       };
       mockGet.mockResolvedValue(mockResponse);
 
-      const result = await service.queryAuthorizationByOutAuthorizationNo(
-        'auth_2020042013',
-        { is_display_authorization: true },
-      );
+      const result = await service.queryAuthorizationByOutAuthorizationNo('auth_2020042013', {
+        is_display_authorization: true,
+      });
 
       expect(mockGet).toHaveBeenCalledWith(
         '/v3/fund-app/mch-transfer/user-confirm-authorization/out-authorization-no/auth_2020042013',

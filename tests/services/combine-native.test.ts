@@ -78,10 +78,7 @@ describe('CombineNativeService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/native',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/native', request);
       expect(result).toEqual(expectedResponse);
       expect(result.data.code_url).toContain('weixin://wxpay/bizpayurl');
     });
@@ -120,10 +117,7 @@ describe('CombineNativeService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/native',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/native', request);
       expect(result.data.code_url).toBeDefined();
     });
 
@@ -167,10 +161,7 @@ describe('CombineNativeService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/native',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/native', request);
       expect(result.data.code_url).toContain('weixin://wxpay/');
     });
   });
@@ -434,10 +425,7 @@ describe('CombineNativeService', () => {
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.out_refund_no).toBe('REFUND_20240609_001');
       expect(result.data.status).toBe('PROCESSING');
     });
@@ -729,7 +717,9 @@ describe('CombineNativeService', () => {
   describe('downloadBill', () => {
     it('should call downloadRaw with the download URL', async () => {
       const downloadUrl = 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx';
-      const billData = Buffer.from('交易时间,商户订单号,微信支付订单号\n2024-06-09,ORDER001,4200001234567890\n');
+      const billData = Buffer.from(
+        '交易时间,商户订单号,微信支付订单号\n2024-06-09,ORDER001,4200001234567890\n',
+      );
 
       mockClient.downloadRaw.mockResolvedValue({
         status: 200,

@@ -58,10 +58,7 @@ describe('MedInsService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/med-ins/orders',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/med-ins/orders', request);
       expect(result.status).toBe(200);
       expect(result.data.trade_state).toBe('SUCCESS');
     });
@@ -101,10 +98,7 @@ describe('MedInsService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/med-ins/orders',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/med-ins/orders', request);
       expect(result.data.trade_state).toBe('SUCCESS');
     });
 
@@ -135,10 +129,7 @@ describe('MedInsService', () => {
 
       await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/med-ins/orders',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/med-ins/orders', request);
     });
   });
 
@@ -158,9 +149,7 @@ describe('MedInsService', () => {
 
       const result = await service.queryByMixTradeNo('MED20240115000001');
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/med-ins/orders/MED20240115000001',
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/med-ins/orders/MED20240115000001');
       expect(result.data.trade_state).toBe('SUCCESS');
     });
 

@@ -121,9 +121,7 @@ describe('ComplaintService', () => {
 
       const result = await service.queryComplaint('123456');
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/merchant-service/complaints-v2/123456',
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/merchant-service/complaints-v2/123456');
       expect(result.data.complaint_id).toBe('123456');
     });
   });
@@ -136,9 +134,7 @@ describe('ComplaintService', () => {
         status: 200,
         headers: {},
         data: {
-          data: [
-            { complaint_id: '123456', message: '协商记录' },
-          ],
+          data: [{ complaint_id: '123456', message: '协商记录' }],
         },
       });
 
@@ -332,9 +328,7 @@ describe('ComplaintService', () => {
 
       const result = await service.queryCallbackUrl();
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/merchant-service/complaint-notifications',
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/merchant-service/complaint-notifications');
       expect(result.data.url).toBe('https://example.com/callback');
     });
   });

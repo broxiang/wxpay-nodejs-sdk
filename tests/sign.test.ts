@@ -65,10 +65,7 @@ describe('sign', () => {
 
     // Verify callback-style signature (timestamp\nnonce\nbody\n)
     const callbackBody = '{"id":"ev-001"}';
-    const callbackSign = sign(
-      `1680000000\ntestnonce\n${callbackBody}\n`,
-      privateKey,
-    );
+    const callbackSign = sign(`1680000000\ntestnonce\n${callbackBody}\n`, privateKey);
     const isValid = verifySignature(
       callbackBody,
       callbackSign,

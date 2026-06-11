@@ -622,8 +622,7 @@ export function buildH5CouponUrl(
 
   // 按字典序拼接签名字符串
   const sortedKeys = Object.keys(signFields).sort();
-  const signStr =
-    sortedKeys.map((k) => `${k}=${signFields[k]}`).join('&') + `&key=${signKey}`;
+  const signStr = sortedKeys.map((k) => `${k}=${signFields[k]}`).join('&') + `&key=${signKey}`;
 
   const sign = crypto.createHmac('sha256', signKey).update(signStr).digest('hex').toUpperCase();
 

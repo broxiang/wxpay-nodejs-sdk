@@ -72,10 +72,7 @@ describe('CombineService - 补充测试 (createRefund, queryRefund, applyAbnorma
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.status).toBe('SUCCESS');
       expect(result.data.refund_id).toBe('50300500362024010100012345678');
       expect(result.data.amount.refund).toBe(100);
@@ -117,10 +114,7 @@ describe('CombineService - 补充测试 (createRefund, queryRefund, applyAbnorma
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.amount.total).toBe(1000);
     });
 
@@ -173,10 +167,7 @@ describe('CombineService - 补充测试 (createRefund, queryRefund, applyAbnorma
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.status).toBe('SUCCESS');
     });
   });
@@ -215,9 +206,7 @@ describe('CombineService - 补充测试 (createRefund, queryRefund, applyAbnorma
 
       const result = await service.queryRefund(params);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds/REFUND20240101001',
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/refund/domestic/refunds/REFUND20240101001');
       expect(result.data.status).toBe('SUCCESS');
       expect(result.data.out_refund_no).toBe('REFUND20240101001');
     });

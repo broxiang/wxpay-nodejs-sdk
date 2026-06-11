@@ -1,8 +1,5 @@
 import type { WxPayResponse } from '../types/index.js';
-import type {
-  CreateMedInsOrderRequest,
-  MedInsOrderResponse,
-} from '../types/index.js';
+import type { CreateMedInsOrderRequest, MedInsOrderResponse } from '../types/index.js';
 import { WxPayClient } from '../core/client.js';
 
 /**
@@ -38,10 +35,7 @@ export class MedInsService {
   async createOrder(
     request: CreateMedInsOrderRequest,
   ): Promise<WxPayResponse<MedInsOrderResponse>> {
-    return this.client.post<MedInsOrderResponse>(
-      '/v3/med-ins/orders',
-      request,
-    );
+    return this.client.post<MedInsOrderResponse>('/v3/med-ins/orders', request);
   }
 
   /**
@@ -54,12 +48,8 @@ export class MedInsService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4016781479
    */
-  async queryByMixTradeNo(
-    mixTradeNo: string,
-  ): Promise<WxPayResponse<MedInsOrderResponse>> {
-    return this.client.get<MedInsOrderResponse>(
-      `/v3/med-ins/orders/${mixTradeNo}`,
-    );
+  async queryByMixTradeNo(mixTradeNo: string): Promise<WxPayResponse<MedInsOrderResponse>> {
+    return this.client.get<MedInsOrderResponse>(`/v3/med-ins/orders/${mixTradeNo}`);
   }
 
   /**
@@ -72,11 +62,7 @@ export class MedInsService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4016781490
    */
-  async queryByOutTradeNo(
-    outTradeNo: string,
-  ): Promise<WxPayResponse<MedInsOrderResponse>> {
-    return this.client.get<MedInsOrderResponse>(
-      `/v3/med-ins/orders/out-trade-no/${outTradeNo}`,
-    );
+  async queryByOutTradeNo(outTradeNo: string): Promise<WxPayResponse<MedInsOrderResponse>> {
+    return this.client.get<MedInsOrderResponse>(`/v3/med-ins/orders/out-trade-no/${outTradeNo}`);
   }
 }

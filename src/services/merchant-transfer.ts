@@ -99,9 +99,7 @@ export class MerchantTransferService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012716458
    */
-  async cancelTransfer(
-    outBillNo: string,
-  ): Promise<WxPayResponse<CancelMerchantTransferResponse>> {
+  async cancelTransfer(outBillNo: string): Promise<WxPayResponse<CancelMerchantTransferResponse>> {
     return this.client.post<CancelMerchantTransferResponse>(
       `/v3/fund-app/mch-transfer/transfer-bills/out-bill-no/${outBillNo}/cancel`,
     );

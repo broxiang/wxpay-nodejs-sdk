@@ -214,10 +214,18 @@ describe('PayScore Detail Bridge Configs', () => {
 
     it('should generate unique timestamps and nonces', () => {
       const config1 = buildPayScoreDetailJsapiBridgeConfig(
-        appId, mchId, serviceId, outOrderNo, privateKey,
+        appId,
+        mchId,
+        serviceId,
+        outOrderNo,
+        privateKey,
       );
       const config2 = buildPayScoreDetailJsapiBridgeConfig(
-        appId, mchId, serviceId, outOrderNo, privateKey,
+        appId,
+        mchId,
+        serviceId,
+        outOrderNo,
+        privateKey,
       );
 
       // 由于时间戳不同，签名也应该不同
@@ -288,7 +296,11 @@ describe('PayScore Detail Bridge Configs', () => {
     it('should produce compatible signature between confirm and detail configs', () => {
       // 确认订单页和详情页使用相同的签名算法
       const detailConfig = buildPayScoreDetailJsapiBridgeConfig(
-        appId, mchId, serviceId, outOrderNo, privateKey,
+        appId,
+        mchId,
+        serviceId,
+        outOrderNo,
+        privateKey,
       );
 
       // 用相同的参数手动验证签名格式

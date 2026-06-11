@@ -46,13 +46,8 @@ export class ParkingService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012533937
    */
-  async createEntry(
-    request: CreateParkingRequest,
-  ): Promise<WxPayResponse<CreateParkingResponse>> {
-    return this.client.post<CreateParkingResponse>(
-      '/v3/vehicle/parking/parkings',
-      request,
-    );
+  async createEntry(request: CreateParkingRequest): Promise<WxPayResponse<CreateParkingResponse>> {
+    return this.client.post<CreateParkingResponse>('/v3/vehicle/parking/parkings', request);
   }
 
   /**
@@ -69,15 +64,12 @@ export class ParkingService {
   async queryPlateService(
     params: QueryPlateServiceParams,
   ): Promise<WxPayResponse<QueryPlateServiceResponse>> {
-    return this.client.get<QueryPlateServiceResponse>(
-      '/v3/vehicle/parking/services/find',
-      {
-        appid: params.appid,
-        plate_number: params.plate_number,
-        openid: params.openid,
-        plate_color: params.plate_color,
-      },
-    );
+    return this.client.get<QueryPlateServiceResponse>('/v3/vehicle/parking/services/find', {
+      appid: params.appid,
+      plate_number: params.plate_number,
+      openid: params.openid,
+      plate_color: params.plate_color,
+    });
   }
 
   /**
@@ -113,9 +105,7 @@ export class ParkingService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012534308
    */
-  async queryTransaction(
-    outTradeNo: string,
-  ): Promise<WxPayResponse<QueryParkingOrderResponse>> {
+  async queryTransaction(outTradeNo: string): Promise<WxPayResponse<QueryParkingOrderResponse>> {
     return this.client.get<QueryParkingOrderResponse>(
       `/v3/vehicle/transactions/out-trade-no/${outTradeNo}`,
     );
@@ -139,10 +129,7 @@ export class ParkingService {
   async applyRefund(
     request: ApplyParkingRefundRequest,
   ): Promise<WxPayResponse<ApplyParkingRefundResponse>> {
-    return this.client.post<ApplyParkingRefundResponse>(
-      '/v3/refund/domestic/refunds',
-      request,
-    );
+    return this.client.post<ApplyParkingRefundResponse>('/v3/refund/domestic/refunds', request);
   }
 
   /**
@@ -156,9 +143,7 @@ export class ParkingService {
    *
    * @see https://pay.weixin.qq.com/doc/v3/merchant/4012557161
    */
-  async queryRefund(
-    outRefundNo: string,
-  ): Promise<WxPayResponse<QueryParkingRefundResponse>> {
+  async queryRefund(outRefundNo: string): Promise<WxPayResponse<QueryParkingRefundResponse>> {
     return this.client.get<QueryParkingRefundResponse>(
       `/v3/refund/domestic/refunds/${outRefundNo}`,
     );

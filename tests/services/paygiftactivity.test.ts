@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PayGiftActivityService } from '../../src/services/paygiftactivity';
 import { WxPayClient } from '../../src/core/client';
-import type {
-  CreatePayGiftActivityRequest,
-  QueryPayGiftActivitiesParams,
-} from '../../src/types';
+import type { CreatePayGiftActivityRequest, QueryPayGiftActivitiesParams } from '../../src/types';
 
 vi.mock('../../src/core/client.js', () => ({
   WxPayClient: vi.fn(),

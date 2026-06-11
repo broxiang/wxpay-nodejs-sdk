@@ -78,10 +78,7 @@ describe('CombineMiniProgramService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/jsapi',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/jsapi', request);
       expect(result).toEqual(expectedResponse);
       expect(result.data.prepay_id).toBe('wx201410272009395522657a690389285100');
     });
@@ -118,10 +115,7 @@ describe('CombineMiniProgramService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/jsapi',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/jsapi', request);
       expect(result.data.prepay_id).toBe('wx_min_prepay_002');
     });
 
@@ -159,10 +153,7 @@ describe('CombineMiniProgramService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/jsapi',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/jsapi', request);
       expect(result.data.prepay_id).toBeDefined();
     });
 
@@ -202,10 +193,7 @@ describe('CombineMiniProgramService', () => {
 
       const result = await service.createOrder(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/combine-transactions/jsapi',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/combine-transactions/jsapi', request);
       expect(result.data.prepay_id).toBeDefined();
     });
   });
@@ -469,10 +457,7 @@ describe('CombineMiniProgramService', () => {
 
       const result = await service.createRefund(request);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        '/v3/refund/domestic/refunds',
-        request,
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
       expect(result.data.out_refund_no).toBe('REFUND_20240609_001');
       expect(result.data.status).toBe('PROCESSING');
     });
@@ -888,7 +873,9 @@ describe('CombineMiniProgramService', () => {
   describe('downloadBill', () => {
     it('should call downloadRaw with the download URL', async () => {
       const downloadUrl = 'https://api.mch.weixin.qq.com/v3/billdownload/file?token=xxx';
-      const billData = Buffer.from('交易时间,商户订单号,微信支付订单号\n2024-06-09,ORDER001,4200001234567890\n');
+      const billData = Buffer.from(
+        '交易时间,商户订单号,微信支付订单号\n2024-06-09,ORDER001,4200001234567890\n',
+      );
 
       mockClient.downloadRaw.mockResolvedValue({
         status: 200,
