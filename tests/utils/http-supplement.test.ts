@@ -4,6 +4,10 @@ import {
   buildUrl,
   parseResponseHeaders,
   createRequestHeaders,
+  parseResponse,
+  ServiceException,
+  ValidationException,
+  MalformedMessageException,
 } from '../../src/utils/http';
 
 /**
@@ -173,5 +177,127 @@ describe('createRequestHeaders - edge cases', () => {
 
     expect(headers.Authorization).toBe('test-auth');
     expect(headers.Accept).toBe('application/json');
+  });
+});
+
+describe('parseResponse', () => {
+  it('should parse successful JSON response', async () => {
+    const response = new Response(JSON.stringify({ id: '123' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const result = await parseResponse(response);
+    expect(result.status).toBe(200);
+    expect(result.data).toEqual({ id: '123' });
+  });
+
+  it('should throw ServiceException on 4xx with JSON body', async () => {
+    const response = new Response(
+      JSON.stringify({ code: 'INVALID_REQUEST', message: '参数错误' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } },
+    );
+
+    await expect(parseResponse(response)).rejects.toThrow(ServiceException);
+  });
+
+  it('should throw ServiceException on 4xx with non-JSON body', async () => {
+    const response = new Response('Internal Server Error', {
+      status: 500,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+
+    await expect(parseResponse(response)).rejects.toThrow(ServiceException);
+  });
+
+  it('should throw ServiceException on 4xx with invalid JSON structure', async () => {
+    const response = new Response(JSON.stringify('just a string'), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    await expect(parseResponse(response)).rejects.toThrow(ServiceException);
+  });
+
+  it('should throw ValidationException when signature verification fails', async () => {
+    const verify = () => false;
+    const response = new Response(JSON.stringify({ id: '123' }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'wechatpay-signature': 'sig',
+        'wechatpay-timestamp': '123',
+        'wechatpay-nonce': 'nonce',
+        'wechatpay-serial': 'serial',
+      },
+    });
+
+    await expect(parseResponse(response, verify)).rejects.toThrow(ValidationException);
+  });
+
+  it('should pass signature verification when valid', async () => {
+    const verify = () => true;
+    const response = new Response(JSON.stringify({ id: '123' }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'wechatpay-signature': 'sig',
+        'wechatpay-timestamp': '123',
+        'wechatpay-nonce': 'nonce',
+        'wechatpay-serial': 'serial',
+      },
+    });
+
+    const result = await parseResponse(response, verify);
+    expect(result.data).toEqual({ id: '123' });
+  });
+
+  it('should skip verification when headers are missing', async () => {
+    const verify = () => {
+      throw new Error('should not be called');
+    };
+    const response = new Response(JSON.stringify({ id: '123' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const result = await parseResponse(response, verify);
+    expect(result.data).toEqual({ id: '123' });
+  });
+
+  it('should throw MalformedMessageException on invalid JSON', async () => {
+    const response = new Response('not json', {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    await expect(parseResponse(response)).rejects.toThrow(MalformedMessageException);
+  });
+
+  it('should throw MalformedMessageException on null JSON', async () => {
+    const response = new Response('null', {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    await expect(parseResponse(response)).rejects.toThrow(MalformedMessageException);
+  });
+
+  it('should include wechatpay headers in response', async () => {
+    const response = new Response(JSON.stringify({ id: '123' }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'wechatpay-serial': 'CERT001',
+        'wechatpay-signature': 'sig',
+        'wechatpay-timestamp': '123',
+        'wechatpay-nonce': 'nonce',
+        'request-id': 'req123',
+      },
+    });
+
+    const result = await parseResponse(response);
+    expect(result.headers['wechatpay-serial']).toBe('CERT001');
+    expect(result.headers['request-id']).toBe('req123');
   });
 });

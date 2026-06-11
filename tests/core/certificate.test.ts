@@ -253,5 +253,98 @@ describe('CertificateManager', () => {
       expect(manager.serialNos).toEqual([]);
       expect(manager.getPublicKey('CERT001')).toBeNull();
     });
+
+    it('should clear wxpay public key', () => {
+      manager.setWxPayPublicKey('PUB_KEY_001', publicKey);
+      expect(manager.getNewestSerial()).toBe('PUB_KEY_001');
+
+      manager.clear();
+      expect(manager.getNewestSerial()).toBeUndefined();
+    });
+  });
+
+  // ============= wxpayPublicKey (公钥模式) =============
+
+  describe('wxpayPublicKey', () => {
+    it('should return wxpay public key when serial matches', () => {
+      manager.setWxPayPublicKey('PUB_KEY_001', publicKey);
+      expect(manager.getPublicKey('PUB_KEY_001')).toBe(publicKey);
+    });
+
+    it('should return wxpay public key when serial starts with PUB_KEY_ID_', () => {
+      manager.setWxPayPublicKey('PUB_KEY_001', publicKey);
+      expect(manager.getPublicKey('PUB_KEY_ID_ANYTHING')).toBe(publicKey);
+    });
+
+    it('should prefer wxpay public key over certificate', () => {
+      manager.setWxPayPublicKey('PUB_KEY_001', publicKey);
+      manager.setPublicKey('CERT001', 'other-key');
+      expect(manager.getNewestSerial()).toBe('PUB_KEY_001');
+    });
+  });
+
+  // ============= getNewestSerial =============
+
+  describe('getNewestSerial', () => {
+    it('should return undefined when empty', () => {
+      expect(manager.getNewestSerial()).toBeUndefined();
+    });
+
+    it('should return first certificate serial', () => {
+      manager.setPublicKey('CERT001', publicKey);
+      expect(manager.getNewestSerial()).toBe('CERT001');
+    });
+  });
+
+  // ============= startAutoUpdate =============
+
+  describe('startAutoUpdate', () => {
+    it('should call updateFn immediately', async () => {
+      const certs = new Map([['CERT_NEW', publicKey]]);
+      const updateFn = vi.fn().mockResolvedValue(certs);
+
+      manager.startAutoUpdate(updateFn);
+      await new Promise((r) => setTimeout(r, 10));
+      expect(updateFn).toHaveBeenCalled();
+      manager.stopAutoUpdate();
+    });
+
+    it('should call onError on failure', async () => {
+      const onError = vi.fn();
+      const updateFn = vi.fn().mockRejectedValue(new Error('update failed'));
+
+      manager.startAutoUpdate(updateFn, { onError });
+      await new Promise((r) => setTimeout(r, 10));
+      expect(onError).toHaveBeenCalled();
+      manager.stopAutoUpdate();
+    });
+
+    it('should call onSuccess on success', async () => {
+      const onSuccess = vi.fn();
+      const certs = new Map([['CERT_NEW', publicKey]]);
+      const updateFn = vi.fn().mockResolvedValue(certs);
+
+      manager.startAutoUpdate(updateFn, { onSuccess });
+      await new Promise((r) => setTimeout(r, 10));
+      expect(onSuccess).toHaveBeenCalledWith(['CERT_NEW']);
+      manager.stopAutoUpdate();
+    });
+
+    it('should stop auto update', () => {
+      const updateFn = vi.fn().mockResolvedValue(new Map());
+      const stop = manager.startAutoUpdate(updateFn);
+      stop();
+      manager.stopAutoUpdate();
+    });
+
+    it('should handle non-Error thrown', async () => {
+      const onError = vi.fn();
+      const updateFn = vi.fn().mockRejectedValue('string error');
+
+      manager.startAutoUpdate(updateFn, { onError });
+      await new Promise((r) => setTimeout(r, 10));
+      expect(onError).toHaveBeenCalled();
+      manager.stopAutoUpdate();
+    });
   });
 });

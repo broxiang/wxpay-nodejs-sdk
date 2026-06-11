@@ -239,6 +239,168 @@ describe('CallbackHandler', () => {
     });
   });
 
+  describe('verifySignature errors', () => {
+    it('should throw on missing wechatpay-serial', () => {
+      expect(() =>
+        handler.verifySignature(
+          { 'wechatpay-signature': 'sig', 'wechatpay-timestamp': '123', 'wechatpay-nonce': 'n' },
+          '{}',
+        ),
+      ).toThrow('回调头 wechatpay-serial 不能为空');
+    });
+
+    it('should throw on missing wechatpay-signature', () => {
+      expect(() =>
+        handler.verifySignature(
+          { 'wechatpay-serial': 'S', 'wechatpay-timestamp': '123', 'wechatpay-nonce': 'n' },
+          '{}',
+        ),
+      ).toThrow('回调头 wechatpay-signature 不能为空');
+    });
+
+    it('should throw on missing wechatpay-timestamp', () => {
+      expect(() =>
+        handler.verifySignature(
+          { 'wechatpay-serial': 'S', 'wechatpay-signature': 'sig', 'wechatpay-nonce': 'n' },
+          '{}',
+        ),
+      ).toThrow('回调头 wechatpay-timestamp 不能为空');
+    });
+
+    it('should throw on missing wechatpay-nonce', () => {
+      expect(() =>
+        handler.verifySignature(
+          { 'wechatpay-serial': 'S', 'wechatpay-signature': 'sig', 'wechatpay-timestamp': '123' },
+          '{}',
+        ),
+      ).toThrow('回调头 wechatpay-nonce 不能为空');
+    });
+
+    it('should throw on unsupported signature type', () => {
+      expect(() =>
+        handler.verifySignature(
+          {
+            'wechatpay-serial': 'S',
+            'wechatpay-signature': 'sig',
+            'wechatpay-timestamp': '123',
+            'wechatpay-nonce': 'n',
+            'wechatpay-signature-type': 'UNSUPPORTED',
+          },
+          '{}',
+        ),
+      ).toThrow('不支持的签名类型');
+    });
+  });
+
+  describe('decryptNotification errors', () => {
+    it('should throw on missing algorithm', () => {
+      expect(() =>
+        handler.decryptNotification({
+          id: '1',
+          create_time: '',
+          event_type: '',
+          resource_type: '',
+          summary: '',
+          resource: { algorithm: '', ciphertext: 'c', nonce: 'n' },
+        }),
+      ).toThrow('回调通知 resource 缺少 algorithm 字段');
+    });
+
+    it('should throw on missing ciphertext', () => {
+      expect(() =>
+        handler.decryptNotification({
+          id: '1',
+          create_time: '',
+          event_type: '',
+          resource_type: '',
+          summary: '',
+          resource: { algorithm: 'AEAD_AES_256_GCM', ciphertext: '', nonce: 'n' },
+        }),
+      ).toThrow('回调通知 resource 缺少 ciphertext 字段');
+    });
+
+    it('should throw on missing nonce', () => {
+      expect(() =>
+        handler.decryptNotification({
+          id: '1',
+          create_time: '',
+          event_type: '',
+          resource_type: '',
+          summary: '',
+          resource: { algorithm: 'AEAD_AES_256_GCM', ciphertext: 'c', nonce: '' },
+        }),
+      ).toThrow('回调通知 resource 缺少 nonce 字段');
+    });
+
+    it('should throw on unsupported algorithm', () => {
+      expect(() =>
+        handler.decryptNotification({
+          id: '1',
+          create_time: '',
+          event_type: '',
+          resource_type: '',
+          summary: '',
+          resource: { algorithm: 'UNSUPPORTED', ciphertext: 'c', nonce: 'n' },
+        }),
+      ).toThrow('不支持的加密算法');
+    });
+
+    it('should throw on invalid JSON', () => {
+      const { ciphertext, nonce, associatedData } = encryptData('not json');
+      expect(() =>
+        handler.decryptNotification({
+          id: '1',
+          create_time: '',
+          event_type: '',
+          resource_type: '',
+          summary: '',
+          resource: {
+            algorithm: 'AEAD_AES_256_GCM',
+            ciphertext,
+            nonce,
+            associated_data: associatedData,
+          },
+        }),
+      ).toThrow('回调数据 JSON 解析失败');
+    });
+
+    it('should throw on null parsed data', () => {
+      const { ciphertext, nonce, associatedData } = encryptData('null');
+      expect(() =>
+        handler.decryptNotification({
+          id: '1',
+          create_time: '',
+          event_type: '',
+          resource_type: '',
+          summary: '',
+          resource: {
+            algorithm: 'AEAD_AES_256_GCM',
+            ciphertext,
+            nonce,
+            associated_data: associatedData,
+          },
+        }),
+      ).toThrow('回调数据格式无效');
+    });
+
+    it('should throw on short ciphertext', () => {
+      expect(() =>
+        handler.decryptNotification({
+          id: '1',
+          create_time: '',
+          event_type: '',
+          resource_type: '',
+          summary: '',
+          resource: {
+            algorithm: 'AEAD_AES_256_GCM',
+            ciphertext: Buffer.from('short').toString('base64'),
+            nonce: '123456789012',
+          },
+        }),
+      ).toThrow('密文长度无效');
+    });
+  });
+
   describe('processRefundCallback', () => {
     it('should process a refund callback', () => {
       const testData = {

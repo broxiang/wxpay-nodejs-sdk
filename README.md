@@ -1,5 +1,9 @@
 # wxpay-nodejs-sdk
 
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/broxiang/wxpay-nodejs-sdk)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+
 微信支付 API V3 Node.js SDK，基于 TypeScript，提供类型安全的支付接口封装。
 
 > **免责声明：本项目为社区开源项目，非微信支付官方 SDK。使用前请阅读 [微信支付官方文档](https://pay.weixin.qq.com/doc/v3/merchant/4012062524)。**
