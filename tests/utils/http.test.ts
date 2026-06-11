@@ -170,7 +170,7 @@ describe('createRequestHeaders', () => {
     expect(headers.Authorization).toBe('WECHATPAY2-SHA256-RSA2048 mchid="1900000100"');
     expect(headers.Accept).toBe('application/json');
     expect(headers['Content-Type']).toBe('application/json');
-    expect(headers['User-Agent']).toBe('wxpay-nodejs-sdk/0.1.0');
+    expect(headers['User-Agent']).toMatch(/^wxpay-nodejs-sdk\/[\d.]+ \(.+\) Node\.js\/v\d+/);
   });
 
   it('should create headers with additional headers', () => {

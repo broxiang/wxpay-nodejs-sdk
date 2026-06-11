@@ -50,10 +50,12 @@ describe('sign', () => {
       privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
 
+    const currentTimestamp = Math.floor(Date.now() / 1000).toString();
+
     const signString = buildSignString({
       method: 'GET',
       path: '/v3/pay/transactions/id/123',
-      timestamp: 1680000000,
+      timestamp: parseInt(currentTimestamp, 10),
       nonce: 'testnonce',
       body: '',
     });
@@ -65,11 +67,11 @@ describe('sign', () => {
 
     // Verify callback-style signature (timestamp\nnonce\nbody\n)
     const callbackBody = '{"id":"ev-001"}';
-    const callbackSign = sign(`1680000000\ntestnonce\n${callbackBody}\n`, privateKey);
+    const callbackSign = sign(`${currentTimestamp}\ntestnonce\n${callbackBody}\n`, privateKey);
     const isValid = verifySignature(
       callbackBody,
       callbackSign,
-      '1680000000',
+      currentTimestamp,
       'testnonce',
       publicKey,
     );

@@ -43,9 +43,23 @@ export interface DecryptedCallback<T = unknown> {
 }
 
 /**
+ * 支持的签名类型
+ *
+ * 目前微信支付仅支持 WECHATPAY2-SHA256-RSA2048 签名类型，
+ * 保留此类型以便未来扩展其他签名算法。
+ */
+export type SignatureType = string;
+
+/**
+ * 已知的签名类型常量
+ */
+const SUPPORTED_SIGNATURE_TYPES = new Set(['WECHATPAY2-SHA256-RSA2048']);
+
+/**
  * 微信支付回调通知处理器
  *
  * 负责验证回调签名并解密回调通知中的业务数据。
+ * 支持通过 Wechatpay-Signature-Type 头识别签名类型。
  *
  * @see https://pay.weixin.qq.com/doc/v3/merchant/4012791861
  * @see https://pay.weixin.qq.com/doc/v3/merchant/4012075249
@@ -63,15 +77,23 @@ export class CallbackHandler {
    * 验证回调通知签名
    *
    * 使用微信支付平台公钥验证回调通知的签名。
+   * 支持读取 Wechatpay-Signature-Type 头识别签名类型。
    *
    * @param headers - 回调请求头
    * @param body - 回调请求体（原始 JSON 字符串）
    * @returns 签名验证是否通过
+   * @throws 如果签名类型不支持或找不到对应的证书
    */
   verifySignature(headers: CallbackHeaders, body: string): boolean {
+    const signatureType = headers['wechatpay-signature-type'];
     const serialNo = headers['wechatpay-serial'];
-    const publicKey = this.certificates.getPublicKey(serialNo);
 
+    // 目前仅支持 WECHATPAY2-SHA256-RSA2048 签名类型
+    if (signatureType && !SUPPORTED_SIGNATURE_TYPES.has(signatureType)) {
+      throw new Error(`不支持的签名类型: ${signatureType}`);
+    }
+
+    const publicKey = this.certificates.getPublicKey(serialNo);
     if (!publicKey) {
       throw new Error(`未找到序列号为 ${serialNo} 的平台证书，请确保已配置平台证书`);
     }

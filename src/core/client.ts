@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import type { WxPayOptions, WxPayResponse, WxPayErrorDetail } from '../types/index.js';
 import { CertificateManager } from './certificate.js';
 import {
@@ -30,11 +31,25 @@ import {
  * ```
  */
 export class WxPayClient {
-  /** 生产环境 API 地址 */
+  /** 生产环境 API 主域名 */
   private static readonly PRODUCTION_BASE = 'https://api.mch.weixin.qq.com';
+
+  /** 生产环境 API 备用域名（跨城容灾） */
+  private static readonly PRODUCTION_BACKUP = 'https://api2.mch.weixin.qq.com';
 
   /** 沙箱环境 API 地址 */
   private static readonly SANDBOX_BASE = 'https://api.mch.weixin.qq.com/sandboxnew';
+
+  /** SDK 版本号 */
+  private static readonly SDK_VERSION = '0.2.1';
+
+  /** 动态 User-Agent 字符串 */
+  private static readonly USER_AGENT = (() => {
+    const platform = os.platform();
+    const arch = os.arch();
+    const nodeVersion = process.version;
+    return `wxpay-nodejs-sdk/${WxPayClient.SDK_VERSION} (${platform} ${arch}) Node.js/${nodeVersion}`;
+  })();
 
   /** 商户号 */
   public readonly mchid: string;
@@ -43,6 +58,7 @@ export class WxPayClient {
   private readonly privateKey: string | Buffer;
   private readonly timeout: number;
   private readonly baseUrl: string;
+  private readonly backupUrl: string | null;
   private readonly enableResponseVerification: boolean;
 
   /** 平台证书管理器 */
@@ -55,6 +71,7 @@ export class WxPayClient {
     this.privateKey = this.resolvePrivateKey(options.privateKey);
     this.timeout = options.timeout ?? 30000;
     this.baseUrl = options.sandbox ? WxPayClient.SANDBOX_BASE : WxPayClient.PRODUCTION_BASE;
+    this.backupUrl = options.sandbox ? null : WxPayClient.PRODUCTION_BACKUP;
     this.enableResponseVerification = options.enableResponseVerification ?? true;
 
     this.certificates = new CertificateManager(this.apiV3Key, options.platformCertificates);
@@ -158,8 +175,13 @@ export class WxPayClient {
     const headers: Record<string, string> = {
       Authorization: authorization,
       Accept: 'application/json',
-      'User-Agent': 'wxpay-nodejs-sdk/0.1.0',
+      'User-Agent': WxPayClient.USER_AGENT,
     };
+
+    const serial = this.certificates.getNewestSerial();
+    if (serial) {
+      headers['Wechatpay-Serial'] = serial;
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -308,8 +330,13 @@ export class WxPayClient {
       Authorization: authorization,
       Accept: 'application/json',
       'Content-Type': `multipart/form-data; boundary=${boundary}`,
-      'User-Agent': 'wxpay-nodejs-sdk/0.1.0',
+      'User-Agent': WxPayClient.USER_AGENT,
     };
+
+    const serial = this.certificates.getNewestSerial();
+    if (serial) {
+      headers['Wechatpay-Serial'] = serial;
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -354,6 +381,8 @@ export class WxPayClient {
 
   /**
    * 通用 HTTP 请求方法
+   *
+   * 支持跨城容灾：当主域名请求失败（网络错误、超时）时，自动切换到备用域名重试。
    */
   private async request<T = unknown>(
     method: string,
@@ -362,76 +391,100 @@ export class WxPayClient {
     body?: object,
     extraHeaders?: Record<string, string>,
   ): Promise<WxPayResponse<T>> {
-    const url = buildUrl(this.baseUrl, path, params);
     const bodyStr = body ? JSON.stringify(body) : '';
     const timestamp = Math.floor(Date.now() / 1000);
     const nonce = generateNonce();
 
-    // 提取 URL 路径部分用于签名
-    const urlObj = new URL(url);
-    const signPath = urlObj.pathname + urlObj.search;
-
-    // 构建签名
-    const signString = buildSignString({
-      method: method.toUpperCase(),
-      path: signPath,
-      timestamp,
-      nonce,
-      body: bodyStr,
+    const headers = createRequestHeaders({
+      authorization: '',
+      wechatPaySerial: this.certificates.getNewestSerial(),
+      additional: extraHeaders,
     });
 
-    const signature = sign(signString, this.privateKey);
+    const urls = [this.baseUrl];
+    if (this.backupUrl) {
+      urls.push(this.backupUrl);
+    }
 
-    // 构建 Authorization 头
-    const authorization = buildAuthorization(
-      this.mchid,
-      this.serialNo,
-      timestamp,
-      nonce,
-      signature,
-    );
+    let lastError: unknown;
 
-    const headers = createRequestHeaders({ authorization, additional: extraHeaders });
+    for (const baseUrl of urls) {
+      const url = buildUrl(baseUrl, path, params);
+      const urlObj = new URL(url);
+      const signPath = urlObj.pathname + urlObj.search;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, this.timeout);
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers,
-        body: bodyStr || undefined,
-        signal: controller.signal,
+      const signString = buildSignString({
+        method: method.toUpperCase(),
+        path: signPath,
+        timestamp,
+        nonce,
+        body: bodyStr,
       });
 
-      return await parseResponse<T>(response, this.createVerifier());
-    } catch (error) {
-      if (error instanceof WxPayError) {
-        throw error;
-      }
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        throw new WxPayError(
-          0,
-          {},
-          {
-            code: 'REQUEST_TIMEOUT',
-            message: `请求超时 (${this.timeout}ms)`,
-          },
-        );
-      }
-      throw new WxPayError(
-        0,
-        {},
-        {
-          code: 'NETWORK_ERROR',
-          message: error instanceof Error ? error.message : '网络请求失败',
-        },
+      const signature = sign(signString, this.privateKey);
+      headers['Authorization'] = buildAuthorization(
+        this.mchid,
+        this.serialNo,
+        timestamp,
+        nonce,
+        signature,
       );
-    } finally {
-      clearTimeout(timeoutId);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, this.timeout);
+
+      try {
+        const response = await fetch(url, {
+          method,
+          headers,
+          body: bodyStr || undefined,
+          signal: controller.signal,
+        });
+
+        return await parseResponse<T>(response, this.createVerifier());
+      } catch (error) {
+        lastError = error;
+
+        const isNetworkError =
+          !(error instanceof WxPayError) &&
+          !(error instanceof DOMException && error.name === 'AbortError');
+
+        if (!isNetworkError || urls.indexOf(baseUrl) === urls.length - 1) {
+          if (error instanceof WxPayError) throw error;
+          if (error instanceof DOMException && error.name === 'AbortError') {
+            throw new WxPayError(
+              0,
+              {},
+              {
+                code: 'REQUEST_TIMEOUT',
+                message: `请求超时 (${this.timeout}ms)`,
+              },
+            );
+          }
+          throw new WxPayError(
+            0,
+            {},
+            {
+              code: 'NETWORK_ERROR',
+              message: error instanceof Error ? error.message : '网络请求失败',
+            },
+          );
+        }
+      } finally {
+        clearTimeout(timeoutId);
+      }
     }
+
+    throw new WxPayError(
+      0,
+      {},
+      {
+        code: 'NETWORK_ERROR',
+        message: lastError instanceof Error ? lastError.message : '网络请求失败',
+      },
+    );
   }
 
   /**

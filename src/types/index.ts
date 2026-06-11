@@ -62,6 +62,8 @@ export interface WxPayOptions {
   wxpayPublicKey?: string | Buffer;
   /** 是否开启应答验签，默认 true */
   enableResponseVerification?: boolean;
+  /** 是否启用跨城容灾（主备域名自动切换），默认 true */
+  enableFailover?: boolean;
 }
 
 /** 请求参数基础类型 */

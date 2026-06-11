@@ -1,4 +1,16 @@
+import os from 'node:os';
 import type { WxPayResponse, WxPayErrorDetail } from '../types/index.js';
+
+/** SDK 版本号，由 package.json 同步 */
+const SDK_VERSION = '0.2.1';
+
+/** 生成动态 User-Agent 字符串 */
+function getUserAgent(): string {
+  const platform = os.platform();
+  const arch = os.arch();
+  const nodeVersion = process.version;
+  return `wxpay-nodejs-sdk/${SDK_VERSION} (${platform} ${arch}) Node.js/${nodeVersion}`;
+}
 
 /**
  * 微信支付 API V3 自定义错误类
@@ -79,15 +91,19 @@ export function createRequestHeaders(options: {
   authorization: string;
   accept?: string;
   contentType?: string;
+  wechatPaySerial?: string;
   additional?: Record<string, string>;
 }): Record<string, string> {
-  return {
+  const headers: Record<string, string> = {
     Authorization: options.authorization,
     Accept: options.accept ?? 'application/json',
     'Content-Type': options.contentType ?? 'application/json',
-    'User-Agent': 'wxpay-nodejs-sdk/0.1.0',
-    ...options.additional,
+    'User-Agent': getUserAgent(),
   };
+  if (options.wechatPaySerial) {
+    headers['Wechatpay-Serial'] = options.wechatPaySerial;
+  }
+  return { ...headers, ...options.additional };
 }
 
 /**

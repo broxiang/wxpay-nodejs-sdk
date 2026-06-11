@@ -2,6 +2,18 @@ import crypto from 'node:crypto';
 import type { PlatformCertificate } from '../types/index.js';
 
 /**
+ * 自动更新配置选项
+ */
+export interface AutoUpdateOptions {
+  /** 更新间隔（毫秒），默认 60 分钟 */
+  intervalMs?: number;
+  /** 更新失败时的回调 */
+  onError?: (error: Error) => void;
+  /** 更新成功时的回调 */
+  onSuccess?: (serialNos: string[]) => void;
+}
+
+/**
  * 微信支付平台证书管理器
  *
  * 支持两种验签模式：
@@ -23,6 +35,9 @@ export class CertificateManager {
   /** API V3 密钥 */
   private readonly apiV3Key: string;
 
+  /** 自动更新定时器 */
+  private autoUpdateTimer: ReturnType<typeof setInterval> | null = null;
+
   constructor(apiV3Key: string, certificates?: PlatformCertificate[]) {
     this.apiV3Key = apiV3Key;
     if (certificates) {
@@ -37,6 +52,22 @@ export class CertificateManager {
    */
   get serialNos(): string[] {
     return Array.from(this.certificates.keys());
+  }
+
+  /**
+   * 获取最新的证书序列号或公钥ID
+   *
+   * 优先返回微信支付公钥ID（公钥模式），否则返回第一个平台证书序列号。
+   * 用于设置请求头 Wechatpay-Serial，告知微信支付客户端支持验签的证书。
+   *
+   * @returns 序列号字符串，无配置时返回 undefined
+   */
+  getNewestSerial(): string | undefined {
+    if (this.wxpayPublicKeyId) {
+      return this.wxpayPublicKeyId;
+    }
+    const keys = Array.from(this.certificates.keys());
+    return keys.length > 0 ? keys[0] : undefined;
   }
 
   /**
@@ -138,5 +169,69 @@ export class CertificateManager {
     this.certificates.clear();
     this.wxpayPublicKey = null;
     this.wxpayPublicKeyId = null;
+  }
+
+  /**
+   * 启动自动更新
+   *
+   * 定期调用更新函数刷新平台证书。适用于生产环境的证书自动维护。
+   *
+   * @param updateFn - 证书更新函数，返回最新的证书 Map
+   * @param options - 自动更新配置选项
+   * @returns 停止更新的函数
+   *
+   * @example
+   * ```ts
+   * const manager = new CertificateManager(apiV3Key);
+   * const stop = manager.startAutoUpdate(
+   *   async () => {
+   *     const certs = await downloadCertificates();
+   *     return certs;
+   *   },
+   *   { intervalMs: 60 * 60 * 1000 }
+   * );
+   * // 稍后停止
+   * stop();
+   * ```
+   */
+  startAutoUpdate(
+    updateFn: () => Promise<Map<string, string>>,
+    options?: AutoUpdateOptions,
+  ): () => void {
+    const intervalMs = options?.intervalMs ?? 60 * 60 * 1000;
+
+    this.stopAutoUpdate();
+
+    const doUpdate = async () => {
+      try {
+        const certs = await updateFn();
+        for (const [serialNo, publicKey] of certs) {
+          this.setPublicKey(serialNo, publicKey);
+        }
+        options?.onSuccess?.(Array.from(certs.keys()));
+      } catch (error) {
+        options?.onError?.(error instanceof Error ? error : new Error(String(error)));
+      }
+    };
+
+    void doUpdate();
+
+    this.autoUpdateTimer = setInterval(() => {
+      void doUpdate();
+    }, intervalMs);
+
+    return () => {
+      this.stopAutoUpdate();
+    };
+  }
+
+  /**
+   * 停止自动更新
+   */
+  stopAutoUpdate(): void {
+    if (this.autoUpdateTimer) {
+      clearInterval(this.autoUpdateTimer);
+      this.autoUpdateTimer = null;
+    }
   }
 }
