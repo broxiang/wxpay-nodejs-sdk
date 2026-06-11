@@ -1,8 +1,20 @@
 import fs from 'node:fs';
 import type { WxPayOptions, WxPayResponse, WxPayErrorDetail } from '../types/index.js';
 import { CertificateManager } from './certificate.js';
-import { WxPayError, buildUrl, createRequestHeaders, parseResponse } from '../utils/http.js';
-import { buildSignString, sign, generateNonce, buildAuthorization } from '../utils/sign.js';
+import {
+  WxPayError,
+  buildUrl,
+  createRequestHeaders,
+  parseResponse,
+  type ResponseVerifier,
+} from '../utils/http.js';
+import {
+  buildSignString,
+  sign,
+  generateNonce,
+  buildAuthorization,
+  verifySignature,
+} from '../utils/sign.js';
 
 /**
  * 微信支付 API V3 客户端
@@ -31,6 +43,7 @@ export class WxPayClient {
   private readonly privateKey: string | Buffer;
   private readonly timeout: number;
   private readonly baseUrl: string;
+  private readonly enableResponseVerification: boolean;
 
   /** 平台证书管理器 */
   public readonly certificates: CertificateManager;
@@ -42,8 +55,15 @@ export class WxPayClient {
     this.privateKey = this.resolvePrivateKey(options.privateKey);
     this.timeout = options.timeout ?? 30000;
     this.baseUrl = options.sandbox ? WxPayClient.SANDBOX_BASE : WxPayClient.PRODUCTION_BASE;
+    this.enableResponseVerification = options.enableResponseVerification ?? true;
 
     this.certificates = new CertificateManager(this.apiV3Key, options.platformCertificates);
+
+    // 配置微信支付公钥（推荐模式）
+    if (options.wxpayPublicKeyId && options.wxpayPublicKey) {
+      const publicKey = this.resolvePublicKey(options.wxpayPublicKey);
+      this.certificates.setWxPayPublicKey(options.wxpayPublicKeyId, publicKey);
+    }
   }
 
   /**
@@ -304,7 +324,7 @@ export class WxPayClient {
         signal: controller.signal,
       });
 
-      return await parseResponse<T>(response);
+      return await parseResponse<T>(response, this.createVerifier());
     } catch (error) {
       if (error instanceof WxPayError) {
         throw error;
@@ -386,7 +406,7 @@ export class WxPayClient {
         signal: controller.signal,
       });
 
-      return await parseResponse<T>(response);
+      return await parseResponse<T>(response, this.createVerifier());
     } catch (error) {
       if (error instanceof WxPayError) {
         throw error;
@@ -430,5 +450,43 @@ export class WxPayClient {
       // 如果读取失败，假定是密钥内容
       return key;
     }
+  }
+
+  /**
+   * 解析公钥：支持直接传入内容或文件路径
+   */
+  private resolvePublicKey(key: string | Buffer): string {
+    if (Buffer.isBuffer(key)) return key.toString('utf-8');
+
+    // 以 PEM 格式开头，直接返回
+    if (key.startsWith('-----BEGIN')) return key;
+
+    // 否则认为是文件路径
+    try {
+      return fs.readFileSync(key, 'utf-8');
+    } catch {
+      return key;
+    }
+  }
+
+  /**
+   * 创建应答验签函数
+   */
+  private createVerifier(): ResponseVerifier | undefined {
+    if (!this.enableResponseVerification) return undefined;
+
+    return (
+      body: string,
+      signature: string,
+      timestamp: string,
+      nonce: string,
+      serial: string,
+    ): boolean => {
+      const publicKey = this.certificates.getPublicKey(serial);
+      if (!publicKey) {
+        throw new Error(`未找到序列号为 ${serial} 的平台证书或公钥，请确保已配置`);
+      }
+      return verifySignature(body, signature, timestamp, nonce, publicKey);
+    };
   }
 }

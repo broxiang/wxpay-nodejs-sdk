@@ -1,45 +1,6 @@
 import type { WxPayResponse, WxPayErrorDetail } from '../types/index.js';
 
 /**
- * 类型安全的 JSON 解析结果
- */
-interface JsonParseResult<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-
-/**
- * 安全地解析 JSON 响应
- *
- * 在运行时验证解析结果的基本结构，避免将 null/undefined 误认为有效数据。
- *
- * @param response - Fetch API 的 Response 对象
- * @returns 解析结果，包含成功状态和数据或错误信息
- */
-async function safeParseJson<T>(response: Response): Promise<JsonParseResult<T>> {
-  try {
-    const data: unknown = await response.json();
-
-    // 基本验证：确保返回的是对象或数组
-    if (data === null || data === undefined) {
-      return { success: false, error: '响应数据为空' };
-    }
-
-    if (typeof data !== 'object') {
-      return { success: false, error: `响应数据类型错误: ${typeof data}` };
-    }
-
-    return { success: true, data: data as T };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'JSON 解析失败',
-    };
-  }
-}
-
-/**
  * 微信支付 API V3 自定义错误类
  */
 export class WxPayError extends Error {
@@ -137,18 +98,50 @@ export function toWxPayBody(data: Record<string, unknown>): string {
 }
 
 /**
- * 解析微信支付 API 的 JSON 响应
+ * 微信支付应答验签函数类型
+ *
+ * @param body - 原始响应体字符串
+ * @param signature - Wechatpay-Signature 头的值
+ * @param timestamp - Wechatpay-Timestamp 头的值
+ * @param nonce - Wechatpay-Nonce 头的值
+ * @param serial - Wechatpay-Serial 头的值（证书序列号或公钥ID）
+ * @returns 验签是否通过
  */
-export async function parseResponse<T>(response: Response): Promise<WxPayResponse<T>> {
+export type ResponseVerifier = (
+  body: string,
+  signature: string,
+  timestamp: string,
+  nonce: string,
+  serial: string,
+) => boolean;
+
+/**
+ * 解析微信支付 API 的 JSON 响应
+ *
+ * @param response - Fetch Response 对象
+ * @param verify - 可选的验签函数，传入时将验证应答签名
+ */
+export async function parseResponse<T>(
+  response: Response,
+  verify?: ResponseVerifier,
+): Promise<WxPayResponse<T>> {
   const headers = parseResponseHeaders(response.headers);
+
+  const rawBody = await response.text();
 
   if (!response.ok) {
     let errorDetail: WxPayErrorDetail;
-    const errorResult = await safeParseJson<WxPayErrorDetail>(response);
-
-    if (errorResult.success && errorResult.data) {
-      errorDetail = errorResult.data;
-    } else {
+    try {
+      const parsed: unknown = JSON.parse(rawBody);
+      if (parsed && typeof parsed === 'object' && 'code' in parsed && 'message' in parsed) {
+        errorDetail = parsed as WxPayErrorDetail;
+      } else {
+        errorDetail = {
+          code: 'HTTP_ERROR',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+    } catch {
       errorDetail = {
         code: 'HTTP_ERROR',
         message: `HTTP ${response.status}: ${response.statusText}`,
@@ -157,18 +150,40 @@ export async function parseResponse<T>(response: Response): Promise<WxPayRespons
     throw new WxPayError(response.status, headers, errorDetail);
   }
 
-  const result = await safeParseJson<T>(response);
+  if (verify) {
+    const signature = headers['wechatpay-signature'];
+    const timestamp = headers['wechatpay-timestamp'];
+    const nonce = headers['wechatpay-nonce'];
+    const serial = headers['wechatpay-serial'];
 
-  if (!result.success || !result.data) {
+    if (signature && timestamp && nonce && serial) {
+      const valid = verify(rawBody, signature, timestamp, nonce, serial);
+      if (!valid) {
+        throw new WxPayError(response.status, headers, {
+          code: 'SIGN_ERROR',
+          message: '应答签名验证失败',
+        });
+      }
+    }
+  }
+
+  let data: T;
+  try {
+    const parsed: unknown = JSON.parse(rawBody);
+    if (parsed === null || parsed === undefined || typeof parsed !== 'object') {
+      throw new Error('响应数据格式错误');
+    }
+    data = parsed as T;
+  } catch (error) {
     throw new WxPayError(response.status, headers, {
       code: 'PARSE_ERROR',
-      message: result.error ?? '响应数据解析失败',
+      message: error instanceof Error ? error.message : '响应数据解析失败',
     });
   }
 
   return {
     status: response.status,
     headers,
-    data: result.data,
+    data,
   };
 }

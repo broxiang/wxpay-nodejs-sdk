@@ -56,6 +56,12 @@ export interface WxPayOptions {
   timeout?: number;
   /** 是否使用沙箱环境，默认 false */
   sandbox?: boolean;
+  /** 微信支付公钥 ID（推荐使用公钥模式验签） */
+  wxpayPublicKeyId?: string;
+  /** 微信支付公钥（PEM 格式字符串或文件路径，推荐使用公钥模式验签） */
+  wxpayPublicKey?: string | Buffer;
+  /** 是否开启应答验签，默认 true */
+  enableResponseVerification?: boolean;
 }
 
 /** 请求参数基础类型 */

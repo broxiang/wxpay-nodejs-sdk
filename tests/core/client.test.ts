@@ -225,6 +225,7 @@ describe('WxPayClient', () => {
         apiV3Key: '0123456789abcdef0123456789abcdef',
         serialNo: CERT_SERIAL_NO,
         privateKey,
+        enableResponseVerification: false,
       });
 
       const mockResponse = new Response(JSON.stringify({ data: 'test' }), {
@@ -532,10 +533,14 @@ describe('WxPayClient', () => {
         privateKey,
       });
 
-      const originalError = new WxPayError(500, {}, {
-        code: 'SYSTEM_ERROR',
-        message: '系统错误',
-      });
+      const originalError = new WxPayError(
+        500,
+        {},
+        {
+          code: 'SYSTEM_ERROR',
+          message: '系统错误',
+        },
+      );
       mockFetch.mockRejectedValue(originalError);
 
       await expect(client.get('/v3/test')).rejects.toThrow(originalError);
@@ -631,7 +636,9 @@ describe('WxPayClient', () => {
       });
       mockFetch.mockResolvedValue(mockResponse);
 
-      const result = await client.downloadRaw('https://api.mch.weixin.qq.com/v3/billdownload/file?token=abc');
+      const result = await client.downloadRaw(
+        'https://api.mch.weixin.qq.com/v3/billdownload/file?token=abc',
+      );
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const options = mockFetch.mock.calls[0][1] as RequestInit;
@@ -745,19 +752,13 @@ describe('WxPayClient', () => {
         privateKey,
       });
 
-      const mockResponse = new Response(
-        JSON.stringify({ media_id: 'MEDIA_001' }),
-        { status: 200 },
-      );
+      const mockResponse = new Response(JSON.stringify({ media_id: 'MEDIA_001' }), { status: 200 });
       mockFetch.mockResolvedValue(mockResponse);
 
       const fileBuffer = Buffer.from('fake-image-data');
-      const result = await client.upload(
-        '/v3/merchant/media/upload',
-        fileBuffer,
-        'test.png',
-        { filename: 'test.png' },
-      );
+      const result = await client.upload('/v3/merchant/media/upload', fileBuffer, 'test.png', {
+        filename: 'test.png',
+      });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const options = mockFetch.mock.calls[0][1] as RequestInit;
@@ -778,10 +779,7 @@ describe('WxPayClient', () => {
         privateKey,
       });
 
-      const mockResponse = new Response(
-        JSON.stringify({ media_id: 'MEDIA_002' }),
-        { status: 200 },
-      );
+      const mockResponse = new Response(JSON.stringify({ media_id: 'MEDIA_002' }), { status: 200 });
       mockFetch.mockResolvedValue(mockResponse);
 
       const fileBuffer = Buffer.from('image-data');

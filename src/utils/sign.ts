@@ -79,13 +79,15 @@ export function generateNonce(): string {
 }
 
 /**
- * 验证微信支付回调通知签名
+ * 验证微信支付应答或回调通知签名
  *
- * @param body - 回调通知的请求体
- * @param signature - 响应头中的 Wechatpay-Signature
- * @param timestamp - 响应头中的 Wechatpay-Timestamp
- * @param nonce - 响应头中的 Wechatpay-Nonce
- * @param publicKey - 微信支付平台公钥
+ * 签名串格式：应答时间戳\n应答随机串\n应答报文主体\n
+ *
+ * @param body - 应答或回调的请求体
+ * @param signature - HTTP 头 Wechatpay-Signature
+ * @param timestamp - HTTP 头 Wechatpay-Timestamp
+ * @param nonce - HTTP 头 Wechatpay-Nonce
+ * @param publicKey - 微信支付公钥或平台证书公钥（PEM 格式）
  */
 export function verifySignature(
   body: string,
@@ -99,4 +101,25 @@ export function verifySignature(
   verifier.update(signString);
   verifier.end();
   return verifier.verify(publicKey, signature, 'base64');
+}
+
+/**
+ * 使用 RSAES-OAEP（SHA-256）算法加密敏感字段
+ *
+ * 用于分账接口等需要加密接收方姓名等敏感信息的场景。
+ *
+ * @param plaintext - 待加密的明文
+ * @param publicKey - 微信支付公钥或平台证书公钥（PEM 格式）
+ * @returns Base64 编码的密文
+ */
+export function oaepEncrypt(plaintext: string, publicKey: string | Buffer): string {
+  const encrypted = crypto.publicEncrypt(
+    {
+      key: publicKey,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    Buffer.from(plaintext, 'utf-8'),
+  );
+  return encrypted.toString('base64');
 }

@@ -4,11 +4,21 @@ import type { PlatformCertificate } from '../types/index.js';
 /**
  * 微信支付平台证书管理器
  *
+ * 支持两种验签模式：
+ * - 微信支付公钥模式（推荐）：通过 wxpayPublicKey 配置微信支付公钥
+ * - 平台证书模式：通过 platformCertificates 配置平台证书
+ *
  * 负责平台证书的解密、缓存和获取公钥
  */
 export class CertificateManager {
   /** 平台证书缓存 Map<序列号, 证书信息> */
   private certificates = new Map<string, PlatformCertificate>();
+
+  /** 微信支付公钥（PEM 格式），支持公钥模式 */
+  private wxpayPublicKey: string | null = null;
+
+  /** 微信支付公钥ID */
+  private wxpayPublicKeyId: string | null = null;
 
   /** API V3 密钥 */
   private readonly apiV3Key: string;
@@ -30,12 +40,35 @@ export class CertificateManager {
   }
 
   /**
-   * 根据序列号获取证书公钥
+   * 设置微信支付公钥（公钥模式）
    *
-   * @param serialNo - 证书序列号
+   * @param publicKeyId - 微信支付公钥ID（从商户平台获取）
+   * @param publicKey - PEM 格式的微信支付公钥
+   */
+  setWxPayPublicKey(publicKeyId: string, publicKey: string): void {
+    this.wxpayPublicKeyId = publicKeyId;
+    this.wxpayPublicKey = publicKey;
+  }
+
+  /**
+   * 获取用于验签的公钥
+   *
+   * 优先返回微信支付公钥（公钥模式），否则根据证书序列号查找平台证书。
+   *
+   * @param serialNo - 证书序列号或公钥ID
    * @returns PEM 格式的公钥，不存在则返回 null
    */
   getPublicKey(serialNo: string): string | null {
+    // 公钥模式：如果配置了微信支付公钥且序列号匹配
+    if (this.wxpayPublicKey && this.wxpayPublicKeyId === serialNo) {
+      return this.wxpayPublicKey;
+    }
+
+    // 公钥模式：如果配置了微信支付公钥且序列号以 PUB_KEY_ID_ 开头
+    if (this.wxpayPublicKey && serialNo.startsWith('PUB_KEY_ID_')) {
+      return this.wxpayPublicKey;
+    }
+
     const cert = this.certificates.get(serialNo);
     if (!cert) return null;
 
@@ -103,5 +136,7 @@ export class CertificateManager {
    */
   clear(): void {
     this.certificates.clear();
+    this.wxpayPublicKey = null;
+    this.wxpayPublicKeyId = null;
   }
 }
