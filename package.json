@@ -38,7 +38,9 @@
     "release:major": "standard-version --release-as major",
     "release:patch": "standard-version --release-as patch",
     "release:dry": "standard-version --dry-run",
-    "publish:npm": "standard-version --release-as minor && npm run build && npm publish --registry https://registry.npmjs.org/",
+    "publish:patch": "standard-version --release-as patch && npm run build && npm publish --registry https://registry.npmjs.org/",
+    "publish:minor": "standard-version --release-as minor && npm run build && npm publish --registry https://registry.npmjs.org/",
+    "publish:major": "standard-version --release-as major && npm run build && npm publish --registry https://registry.npmjs.org/",
     "publish:beta": "standard-version --prerelease beta && npm run build && npm publish --tag beta --registry https://registry.npmjs.org/"
   },
   "lint-staged": {
