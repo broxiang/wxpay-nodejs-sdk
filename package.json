@@ -1,6 +1,6 @@
 {
   "name": "wxpay-nodejs-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "微信支付 API V3 Node.js SDK",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -37,7 +37,9 @@
     "release:minor": "standard-version --release-as minor",
     "release:major": "standard-version --release-as major",
     "release:patch": "standard-version --release-as patch",
-    "release:dry": "standard-version --dry-run"
+    "release:dry": "standard-version --dry-run",
+    "publish:npm": "standard-version --release-as minor && npm run build && npm publish --registry https://registry.npmjs.org/",
+    "publish:beta": "standard-version --prerelease beta && npm run build && npm publish --tag beta --registry https://registry.npmjs.org/"
   },
   "lint-staged": {
     "*.ts": [
