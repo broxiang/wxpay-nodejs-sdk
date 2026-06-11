@@ -47,6 +47,7 @@ const client = new WxPayClient({
 const jsapi = new JsapiService(client);
 const order = await jsapi.createOrder({
   appid: 'wx1234567890abcdef',
+  mchid: '1900000100',
   description: '商品描述',
   out_trade_no: '订单号',
   amount: { total: 100, currency: 'CNY' },

@@ -28,4 +28,5 @@ tags = ["wechatpay", "cert"]
 paths = [
   '''tests/.*\.test\.ts''',
   '''tests/.*\.ts''',
+  '''README\.md''',
 ]
