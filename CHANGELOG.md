@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.5](https://github.com/broxiang/wxpay-nodejs-sdk/compare/v0.2.4...v0.2.5) (2026-06-12)
+
+### ✨ 新功能 (Features)
+
+- 补齐 SDK 能力，新增服务商支付、电商收付通、组合验签器等功能 ([4cd7221](https://github.com/broxiang/wxpay-nodejs-sdk/commit/4cd72215311cddf509892f5d10bb9167d7b41f8f))
+
 ### [0.2.4](https://github.com/broxiang/wxpay-nodejs-sdk/compare/v0.2.3...v0.2.4) (2026-06-11)
 
 ### [0.2.3](https://github.com/broxiang/wxpay-nodejs-sdk/compare/v0.2.2...v0.2.3) (2026-06-11)
