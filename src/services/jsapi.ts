@@ -15,8 +15,10 @@ import type {
   TradeBillResponse,
   FundFlowBillParams,
   FundFlowBillResponse,
+  JsapiBridgeConfig,
 } from '../types/index.js';
 import { WxPayClient } from '../core/client.js';
+import { buildJsapiBridgeConfig } from './bridge.js';
 
 /**
  * JSAPI 支付 / 小程序支付 服务
@@ -63,18 +65,55 @@ export class JsapiService {
    */
   async queryOrderById(params: QueryOrderParams): Promise<WxPayResponse<QueryOrderResponse>> {
     if (params.transactionId) {
-      return this.client.get<QueryOrderResponse>(
-        `/v3/pay/transactions/id/${params.transactionId}`,
-        { mchid: this.client.mchid },
-      );
+      return this.queryOrderByTransactionId(params.transactionId);
     }
     if (params.outTradeNo) {
-      return this.client.get<QueryOrderResponse>(
-        `/v3/pay/transactions/out-trade-no/${params.outTradeNo}`,
-        { mchid: this.client.mchid },
-      );
+      return this.queryOrderByOutTradeNo(params.outTradeNo);
     }
     throw new Error('outTradeNo 或 transactionId 必须提供其中一个');
+  }
+
+  /**
+   * 通过商户订单号查询订单
+   *
+   * @see https://pay.weixin.qq.com/doc/v3/merchant/4012791859
+   */
+  async queryOrderByOutTradeNo(outTradeNo: string): Promise<WxPayResponse<QueryOrderResponse>> {
+    return this.client.get<QueryOrderResponse>(`/v3/pay/transactions/out-trade-no/${outTradeNo}`, {
+      mchid: this.client.mchid,
+    });
+  }
+
+  /**
+   * 通过微信支付订单号查询订单
+   *
+   * @see https://pay.weixin.qq.com/doc/v3/merchant/4012791858
+   */
+  async queryOrderByTransactionId(
+    transactionId: string,
+  ): Promise<WxPayResponse<QueryOrderResponse>> {
+    return this.client.get<QueryOrderResponse>(`/v3/pay/transactions/id/${transactionId}`, {
+      mchid: this.client.mchid,
+    });
+  }
+
+  /**
+   * JSAPI 下单并生成调起支付参数
+   *
+   * 封装了下单和调起支付参数生成两个步骤，一次调用即可获得
+   * prepay_id 和前端 WeixinJSBridge.invoke() 所需的全部参数。
+   *
+   * @param request - 下单请求参数（需包含 appid）
+   * @param privateKey - 商户私钥
+   * @returns 下单响应 + 调起支付参数
+   */
+  async prepayWithRequestPayment(
+    request: CreateJsapiOrderRequest,
+    privateKey: string | Buffer,
+  ): Promise<WxPayResponse<CreateJsapiOrderResponse> & { bridgeConfig: JsapiBridgeConfig }> {
+    const response = await this.createOrder(request);
+    const bridgeConfig = buildJsapiBridgeConfig(request.appid, response.data.prepay_id, privateKey);
+    return { ...response, bridgeConfig };
   }
 
   /**

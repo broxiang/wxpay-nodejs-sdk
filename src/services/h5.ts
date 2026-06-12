@@ -63,18 +63,26 @@ export class H5Service {
    */
   async queryOrderById(params: QueryOrderParams): Promise<WxPayResponse<QueryOrderResponse>> {
     if (params.transactionId) {
-      return this.client.get<QueryOrderResponse>(
-        `/v3/pay/transactions/id/${params.transactionId}`,
-        { mchid: this.client.mchid },
-      );
+      return this.queryOrderByTransactionId(params.transactionId);
     }
     if (params.outTradeNo) {
-      return this.client.get<QueryOrderResponse>(
-        `/v3/pay/transactions/out-trade-no/${params.outTradeNo}`,
-        { mchid: this.client.mchid },
-      );
+      return this.queryOrderByOutTradeNo(params.outTradeNo);
     }
     throw new Error('outTradeNo 或 transactionId 必须提供其中一个');
+  }
+
+  async queryOrderByOutTradeNo(outTradeNo: string): Promise<WxPayResponse<QueryOrderResponse>> {
+    return this.client.get<QueryOrderResponse>(`/v3/pay/transactions/out-trade-no/${outTradeNo}`, {
+      mchid: this.client.mchid,
+    });
+  }
+
+  async queryOrderByTransactionId(
+    transactionId: string,
+  ): Promise<WxPayResponse<QueryOrderResponse>> {
+    return this.client.get<QueryOrderResponse>(`/v3/pay/transactions/id/${transactionId}`, {
+      mchid: this.client.mchid,
+    });
   }
 
   /**

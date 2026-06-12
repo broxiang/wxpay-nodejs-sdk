@@ -1,5 +1,6 @@
 import os from 'node:os';
 import type { WxPayResponse } from '../types/index.js';
+import { SDK_VERSION } from '../version.js';
 import {
   WxPayError,
   ServiceException,
@@ -9,9 +10,6 @@ import {
 } from './exceptions.js';
 
 export { WxPayError, ServiceException, ValidationException, MalformedMessageException };
-
-/** SDK 版本号，由 package.json 同步 */
-const SDK_VERSION = '0.2.1';
 
 /** 生成动态 User-Agent 字符串 */
 function getUserAgent(): string {

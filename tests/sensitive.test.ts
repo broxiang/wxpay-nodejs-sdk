@@ -77,4 +77,11 @@ describe('sensitive', () => {
     expect(decrypted[0]?.name).toBe('张三');
     expect(decrypted[1]?.name).toBe('李四');
   });
+
+  it('should keep original value when decryption fails (non-encrypted field)', () => {
+    registerSensitiveFields('Fallback', ['name']);
+    const obj = { name: 'not-encrypted-plaintext' };
+    const result = decryptSensitiveFields(obj, 'Fallback', privateKey);
+    expect(result.name).toBe('not-encrypted-plaintext');
+  });
 });

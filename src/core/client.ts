@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import type { WxPayOptions, WxPayResponse, WxPayErrorDetail } from '../types/index.js';
+import { SDK_VERSION } from '../version.js';
 import { CertificateManager } from './certificate.js';
 import {
   WxPayError,
@@ -40,15 +41,12 @@ export class WxPayClient {
   /** 沙箱环境 API 地址 */
   private static readonly SANDBOX_BASE = 'https://api.mch.weixin.qq.com/sandboxnew';
 
-  /** SDK 版本号 */
-  private static readonly SDK_VERSION = '0.2.1';
-
   /** 动态 User-Agent 字符串 */
   private static readonly USER_AGENT = (() => {
     const platform = os.platform();
     const arch = os.arch();
     const nodeVersion = process.version;
-    return `wxpay-nodejs-sdk/${WxPayClient.SDK_VERSION} (${platform} ${arch}) Node.js/${nodeVersion}`;
+    return `wxpay-nodejs-sdk/${SDK_VERSION} (${platform} ${arch}) Node.js/${nodeVersion}`;
   })();
 
   /** 商户号 */
@@ -60,6 +58,7 @@ export class WxPayClient {
   private readonly baseUrl: string;
   private readonly backupUrl: string | null;
   private readonly enableResponseVerification: boolean;
+  private readonly customFetch: typeof fetch;
 
   /** 平台证书管理器 */
   public readonly certificates: CertificateManager;
@@ -73,6 +72,7 @@ export class WxPayClient {
     this.baseUrl = options.sandbox ? WxPayClient.SANDBOX_BASE : WxPayClient.PRODUCTION_BASE;
     this.backupUrl = options.sandbox ? null : WxPayClient.PRODUCTION_BACKUP;
     this.enableResponseVerification = options.enableResponseVerification ?? true;
+    this.customFetch = options.customFetch ?? fetch;
 
     this.certificates = new CertificateManager(this.apiV3Key, options.platformCertificates);
 
@@ -189,7 +189,7 @@ export class WxPayClient {
     }, this.timeout);
 
     try {
-      const response = await fetch(url, {
+      const response = await this.customFetch(url, {
         method,
         headers,
         signal: controller.signal,
@@ -344,7 +344,7 @@ export class WxPayClient {
     }, this.timeout);
 
     try {
-      const response = await fetch(url, {
+      const response = await this.customFetch(url, {
         method: 'POST',
         headers,
         body,
@@ -436,7 +436,7 @@ export class WxPayClient {
       }, this.timeout);
 
       try {
-        const response = await fetch(url, {
+        const response = await this.customFetch(url, {
           method,
           headers,
           body: bodyStr || undefined,

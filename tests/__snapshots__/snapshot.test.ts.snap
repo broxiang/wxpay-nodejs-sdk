@@ -78,7 +78,7 @@ exports[`Snapshot: HTTP 请求头结构 > multipart/form-data 请求头 1`] = `
   "Accept": "application/json",
   "Authorization": "WECHATPAY2-SHA256-RSA2048 mchid="1900000100"",
   "Content-Type": "multipart/form-data",
-  "User-Agent": "wxpay-nodejs-sdk/0.2.1 (darwin arm64) Node.js/v24.14.1",
+  "User-Agent": "wxpay-nodejs-sdk/0.2.4 (darwin arm64) Node.js/v24.14.1",
 }
 `;
 
@@ -88,7 +88,7 @@ exports[`Snapshot: HTTP 请求头结构 > 带额外头部的请求头 1`] = `
   "Authorization": "WECHATPAY2-SHA256-RSA2048 mchid="1900000100"",
   "Content-Type": "application/json",
   "Idempotency-Key": "key-12345",
-  "User-Agent": "wxpay-nodejs-sdk/0.2.1 (darwin arm64) Node.js/v24.14.1",
+  "User-Agent": "wxpay-nodejs-sdk/0.2.4 (darwin arm64) Node.js/v24.14.1",
   "Wechatpay-Serial": "CERT_SERIAL_NO",
 }
 `;
@@ -98,7 +98,7 @@ exports[`Snapshot: HTTP 请求头结构 > 标准 JSON 请求头 1`] = `
   "Accept": "application/json",
   "Authorization": "WECHATPAY2-SHA256-RSA2048 mchid="1900000100",nonce_str="abc123"",
   "Content-Type": "application/json",
-  "User-Agent": "wxpay-nodejs-sdk/0.2.1 (darwin arm64) Node.js/v24.14.1",
+  "User-Agent": "wxpay-nodejs-sdk/0.2.4 (darwin arm64) Node.js/v24.14.1",
 }
 `;
 

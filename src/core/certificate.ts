@@ -85,6 +85,7 @@ export class CertificateManager {
    * 获取用于验签的公钥
    *
    * 优先返回微信支付公钥（公钥模式），否则根据证书序列号查找平台证书。
+   * 在组合模式下，如果证书未找到，会回退到微信支付公钥。
    *
    * @param serialNo - 证书序列号或公钥ID
    * @returns PEM 格式的公钥，不存在则返回 null
@@ -101,7 +102,13 @@ export class CertificateManager {
     }
 
     const cert = this.certificates.get(serialNo);
-    if (!cert) return null;
+    if (!cert) {
+      // 组合模式：证书未找到时，尝试用公钥（用于平台证书→公钥迁移期间）
+      if (this.wxpayPublicKey) {
+        return this.wxpayPublicKey;
+      }
+      return null;
+    }
 
     const { ciphertext, nonce, associatedData, algorithm } = cert.encryptCertificate;
 
@@ -128,6 +135,18 @@ export class CertificateManager {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * 判断当前是否为组合验签模式
+   *
+   * 当同时配置了微信支付公钥和平台证书时，返回 true。
+   * 组合模式用于平台证书→微信支付公钥的灰度迁移期间。
+   *
+   * @returns 是否为组合模式
+   */
+  isCombinedMode(): boolean {
+    return this.wxpayPublicKey !== null && this.certificates.size > 0;
   }
 
   /**

@@ -64,6 +64,8 @@ export interface WxPayOptions {
   enableResponseVerification?: boolean;
   /** 是否启用跨城容灾（主备域名自动切换），默认 true */
   enableFailover?: boolean;
+  /** 自定义 fetch 实现，用于注入代理、自定义超时等场景 */
+  customFetch?: typeof fetch;
 }
 
 /** 请求参数基础类型 */
@@ -680,6 +682,62 @@ export interface FundFlowBillResponse {
   hash_value: string;
   /** 下载地址 */
   download_url: string;
+}
+
+// ============= 申请单个子商户资金账单 =============
+
+/** 申请单个子商户资金账单请求参数 */
+export interface SubMerchantFundFlowBillParams {
+  /** 子商户号 */
+  sub_mchid: string;
+  /** 账单日期，格式 YYYY-MM-DD */
+  bill_date: string;
+  /** 资金账户类型 */
+  account_type?: 'BASIC' | 'OPERATION' | 'ALL';
+  /** 账单文件加密算法 */
+  algorithm?: 'AEAD_AES_256_GCM';
+  /** 压缩方式 */
+  tar_type?: 'GZIP';
+  [key: string]: unknown;
+}
+
+/** 加密账单文件信息 */
+export interface EncryptBillEntity {
+  /** 账单文件序号 */
+  bill_sequence: number;
+  /** 哈希类型 */
+  hash_type: string;
+  /** 哈希值 */
+  hash_value: string;
+  /** 下载地址（5分钟内有效） */
+  download_url: string;
+  /** 加密密钥（已用商户证书公钥加密） */
+  encrypt_key: string;
+  /** 随机字符串 */
+  nonce: string;
+}
+
+/** 加密账单响应 */
+export interface EncryptBillResponse {
+  /** 下载信息总数 */
+  download_bill_count: number;
+  /** 下载信息明细 */
+  download_bill_list: EncryptBillEntity[];
+}
+
+// ============= 申请二级商户资金账单 =============
+
+/** 申请二级商户资金账单请求参数 */
+export interface EcommerceFundFlowBillParams {
+  /** 账单日期，格式 YYYY-MM-DD */
+  bill_date: string;
+  /** 资金账户类型（本接口只支持填 ALL） */
+  account_type?: 'ALL';
+  /** 压缩方式 */
+  tar_type?: 'GZIP';
+  /** 账单文件加密算法 */
+  algorithm?: 'AEAD_AES_256_GCM';
+  [key: string]: unknown;
 }
 
 // ============= 回调通知 =============
@@ -5089,4 +5147,148 @@ export interface MedInsJsapiBridgeConfig {
   sign_type: 'RSA';
   /** 签名 */
   sign: string;
+}
+
+// ============= 服务商 JSAPI 支付 =============
+
+export interface PartnerJsapiPayer {
+  sp_openid?: string;
+  sub_openid?: string;
+}
+
+export interface CreatePartnerJsapiOrderRequest {
+  sp_appid: string;
+  sp_mchid: string;
+  sub_appid?: string;
+  sub_mchid: string;
+  description: string;
+  out_trade_no: string;
+  time_expire?: string;
+  attach?: string;
+  notify_url: string;
+  goods_tag?: string;
+  support_fapiao?: boolean;
+  amount: OrderAmount;
+  payer: PartnerJsapiPayer;
+  detail?: OrderDetail;
+  scene_info?: SceneInfo;
+  settle_info?: SettleInfo;
+}
+
+export interface CreatePartnerJsapiOrderResponse {
+  prepay_id: string;
+}
+
+// ============= 服务商 APP 支付 =============
+
+export interface CreatePartnerAppOrderRequest {
+  sp_appid: string;
+  sp_mchid: string;
+  sub_appid?: string;
+  sub_mchid: string;
+  description: string;
+  out_trade_no: string;
+  time_expire?: string;
+  attach?: string;
+  notify_url: string;
+  goods_tag?: string;
+  support_fapiao?: boolean;
+  amount: OrderAmount;
+  detail?: OrderDetail;
+  scene_info?: SceneInfo;
+  settle_info?: SettleInfo;
+}
+
+export interface CreatePartnerAppOrderResponse {
+  prepay_id: string;
+}
+
+// ============= 服务商 H5 支付 =============
+
+export interface PartnerH5SceneInfo {
+  payer_client_ip: string;
+  device_id?: string;
+  store_info?: StoreInfo;
+  h5_info: H5Info;
+}
+
+export interface CreatePartnerH5OrderRequest {
+  sp_appid: string;
+  sp_mchid: string;
+  sub_appid?: string;
+  sub_mchid: string;
+  description: string;
+  out_trade_no: string;
+  time_expire?: string;
+  attach?: string;
+  notify_url: string;
+  goods_tag?: string;
+  support_fapiao?: boolean;
+  amount: OrderAmount;
+  detail?: OrderDetail;
+  scene_info: PartnerH5SceneInfo;
+  settle_info?: SettleInfo;
+}
+
+export interface CreatePartnerH5OrderResponse {
+  h5_url: string;
+}
+
+// ============= 服务商 Native 支付 =============
+
+export interface CreatePartnerNativeOrderRequest {
+  sp_appid: string;
+  sp_mchid: string;
+  sub_appid?: string;
+  sub_mchid: string;
+  description: string;
+  out_trade_no: string;
+  time_expire?: string;
+  attach?: string;
+  notify_url: string;
+  goods_tag?: string;
+  support_fapiao?: boolean;
+  amount: OrderAmount;
+  detail?: OrderDetail;
+  scene_info?: SceneInfo;
+  settle_info?: SettleInfo;
+}
+
+export interface CreatePartnerNativeOrderResponse {
+  code_url: string;
+}
+
+// ============= 服务商订单查询 =============
+
+export interface PartnerQueryOrderParams {
+  out_trade_no?: string;
+  transaction_id?: string;
+  sp_mchid: string;
+  sub_mchid: string;
+}
+
+export interface PartnerQueryOrderResponse {
+  sp_appid: string;
+  sp_mchid: string;
+  sub_appid?: string;
+  sub_mchid: string;
+  out_trade_no: string;
+  transaction_id?: string;
+  trade_type?: string;
+  trade_state: string;
+  trade_state_desc: string;
+  bank_type?: string;
+  attach?: string;
+  success_time?: string;
+  payer: PartnerJsapiPayer;
+  amount: OrderAmountResponse;
+  scene_info?: SceneInfoResponse;
+  promotion_detail?: PromotionDetail[];
+}
+
+// ============= 服务商关闭订单 =============
+
+export interface PartnerCloseOrderRequest {
+  sp_mchid: string;
+  sub_mchid: string;
 }

@@ -46,6 +46,18 @@ export { RetailStoreService } from './services/retailstore.js';
 export { GoldPlanService } from './services/goldplan.js';
 export { LoveFeastService } from './services/lovefeast.js';
 export { MerchantExclusiveCouponService } from './services/merchant-exclusive-coupon.js';
+export { RefundService } from './services/refund.js';
+export { PartnerJsapiService } from './services/partner-jsapi.js';
+export { PartnerAppService } from './services/partner-app.js';
+export { PartnerH5Service } from './services/partner-h5.js';
+export { PartnerNativeService } from './services/partner-native.js';
+export { PartnerTransferService } from './services/partner-transfer.js';
+export { TransferBatchService } from './services/transfer-batch.js';
+export { PartnerTransferBatchService } from './services/partner-transfer-batch.js';
+export { EcommerceProfitSharingService } from './services/ecommerce-profitsharing.js';
+export { EcommerceRefundService } from './services/ecommerce-refund.js';
+export { EcommerceSubsidyService } from './services/ecommerce-subsidy.js';
+export { BrandProfitSharingService } from './services/brand-profitsharing.js';
 export type { DecryptedCallback, SignatureType } from './services/callback.js';
 export {
   generateAppPaySign,
@@ -83,4 +95,13 @@ export {
   oaepDecrypt,
 } from './utils/sign.js';
 export type { SignPayload } from './utils/sign.js';
+export {
+  loadCertificate,
+  loadCertificateFromPath,
+  loadPrivateKey,
+  loadPublicKey,
+  getCertificateSerialNumber,
+  isCertificateExpired,
+  isCertificateValid,
+} from './utils/pem.js';
 export * from './types/index.js';

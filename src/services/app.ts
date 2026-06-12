@@ -15,8 +15,10 @@ import type {
   TradeBillResponse,
   FundFlowBillParams,
   FundFlowBillResponse,
+  AppBridgeConfig,
 } from '../types/index.js';
 import { WxPayClient } from '../core/client.js';
+import { buildAppBridgeConfig } from './bridge.js';
 
 /**
  * APP 支付服务
@@ -65,18 +67,40 @@ export class AppService {
    */
   async queryOrderById(params: QueryOrderParams): Promise<WxPayResponse<QueryOrderResponse>> {
     if (params.transactionId) {
-      return this.client.get<QueryOrderResponse>(
-        `/v3/pay/transactions/id/${params.transactionId}`,
-        { mchid: this.client.mchid },
-      );
+      return this.queryOrderByTransactionId(params.transactionId);
     }
     if (params.outTradeNo) {
-      return this.client.get<QueryOrderResponse>(
-        `/v3/pay/transactions/out-trade-no/${params.outTradeNo}`,
-        { mchid: this.client.mchid },
-      );
+      return this.queryOrderByOutTradeNo(params.outTradeNo);
     }
     throw new Error('outTradeNo 或 transactionId 必须提供其中一个');
+  }
+
+  async queryOrderByOutTradeNo(outTradeNo: string): Promise<WxPayResponse<QueryOrderResponse>> {
+    return this.client.get<QueryOrderResponse>(`/v3/pay/transactions/out-trade-no/${outTradeNo}`, {
+      mchid: this.client.mchid,
+    });
+  }
+
+  async queryOrderByTransactionId(
+    transactionId: string,
+  ): Promise<WxPayResponse<QueryOrderResponse>> {
+    return this.client.get<QueryOrderResponse>(`/v3/pay/transactions/id/${transactionId}`, {
+      mchid: this.client.mchid,
+    });
+  }
+
+  async prepayWithRequestPayment(
+    request: CreateAppOrderRequest,
+    privateKey: string | Buffer,
+  ): Promise<WxPayResponse<CreateAppOrderResponse> & { bridgeConfig: AppBridgeConfig }> {
+    const response = await this.createOrder(request);
+    const bridgeConfig = buildAppBridgeConfig(
+      request.appid,
+      this.client.mchid,
+      response.data.prepay_id,
+      privateKey,
+    );
+    return { ...response, bridgeConfig };
   }
 
   /**

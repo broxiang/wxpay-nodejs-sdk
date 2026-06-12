@@ -521,4 +521,40 @@ describe('JsapiService', () => {
       expect(Buffer.isBuffer(result.data)).toBe(true);
     });
   });
+
+  // ============= prepayWithRequestPayment =============
+
+  describe('prepayWithRequestPayment', () => {
+    it('should create order and return bridgeConfig', async () => {
+      const request = {
+        appid: 'wx8888888888888888',
+        mchid: '1900000100',
+        description: '测试商品',
+        out_trade_no: 'JP20240115000001',
+        notify_url: 'https://example.com/notify',
+        amount: { total: 100 },
+        payer: { openid: 'oUpF8uMuAJO_M2pxb1Q9zNjWeS6o' },
+      };
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: { prepay_id: 'wx201410272009395522657a690389285100' },
+      });
+
+      const crypto = await import('node:crypto');
+      const { privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      });
+
+      const result = await service.prepayWithRequestPayment(request, privateKey);
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/pay/transactions/jsapi', request);
+      expect(result.data.prepay_id).toBe('wx201410272009395522657a690389285100');
+      expect(result.bridgeConfig).toBeDefined();
+      expect(result.bridgeConfig.appId).toBe('wx8888888888888888');
+      expect(result.bridgeConfig.package).toContain('prepay_id=');
+      expect(result.bridgeConfig.signType).toBe('RSA');
+    });
+  });
 });

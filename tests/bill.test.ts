@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import crypto from 'node:crypto';
+import zlib from 'node:zlib';
 import { BillService } from '../src/services/bill';
 import { WxPayClient } from '../src/core/client';
 import type { TradeBillParams, FundFlowBillParams, ProfitSharingBillParams } from '../src/types';
@@ -345,6 +347,206 @@ describe('BillService', () => {
       expect(mockClient.downloadRaw).toHaveBeenCalledWith(downloadUrl);
       expect(Buffer.isBuffer(downloadResult.data)).toBe(true);
       expect(downloadResult.status).toBe(200);
+    });
+  });
+
+  // ============= downloadAndVerifyBill =============
+
+  describe('downloadAndVerifyBill', () => {
+    it('should download and decompress GZIP bill', async () => {
+      const rawContent = Buffer.from(
+        '交易时间,公众账号ID,商户号\n2024-01-15,wx123,1900000100',
+        'utf-8',
+      );
+      const gzipped = zlib.gzipSync(rawContent);
+
+      mockClient.downloadRaw.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: gzipped,
+      });
+
+      const result = await service.downloadAndVerifyBill('https://example.com/bill');
+      expect(result.data.toString()).toContain('交易时间');
+    });
+
+    it('should download and verify SHA-1 digest', async () => {
+      const rawContent = Buffer.from('bill content', 'utf-8');
+      const digest = crypto.createHash('sha1').update(rawContent).digest('hex');
+
+      mockClient.downloadRaw.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: rawContent,
+      });
+
+      const result = await service.downloadAndVerifyBill('https://example.com/bill', digest);
+      expect(result.data.toString()).toBe('bill content');
+    });
+
+    it('should throw on digest mismatch', async () => {
+      const rawContent = Buffer.from('bill content', 'utf-8');
+
+      mockClient.downloadRaw.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: rawContent,
+      });
+
+      await expect(
+        service.downloadAndVerifyBill('https://example.com/bill', 'wrongdigest'),
+      ).rejects.toThrow('账单摘要校验失败');
+    });
+
+    it('should skip verification when no digest provided', async () => {
+      const rawContent = Buffer.from('plain content', 'utf-8');
+
+      mockClient.downloadRaw.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: rawContent,
+      });
+
+      const result = await service.downloadAndVerifyBill('https://example.com/bill');
+      expect(result.data.toString()).toBe('plain content');
+    });
+
+    it('should handle non-GZIP content without decompression', async () => {
+      const rawContent = Buffer.from('plain text, not gzip', 'utf-8');
+
+      mockClient.downloadRaw.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: rawContent,
+      });
+
+      const result = await service.downloadAndVerifyBill('https://example.com/bill');
+      expect(result.data.toString()).toBe('plain text, not gzip');
+    });
+  });
+
+  // ============= applySubMerchantFundFlowBill =============
+
+  describe('applySubMerchantFundFlowBill', () => {
+    it('should apply sub merchant fund flow bill', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: {
+          download_bill_count: 1,
+          download_bill_list: [
+            {
+              bill_sequence: 1,
+              hash_type: 'SHA1',
+              hash_value: 'abc123',
+              download_url: 'https://example.com/sub-bill',
+              encrypt_key: 'encrypted-key',
+              nonce: 'nonce123',
+            },
+          ],
+        },
+      });
+
+      const result = await service.applySubMerchantFundFlowBill({
+        sub_mchid: '1900000101',
+        bill_date: '2024-01-15',
+      });
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/sub-merchant-fundflowbill', {
+        sub_mchid: '1900000101',
+        bill_date: '2024-01-15',
+        account_type: undefined,
+        algorithm: undefined,
+        tar_type: undefined,
+      });
+      expect(result.data.download_bill_count).toBe(1);
+      expect(result.data.download_bill_list[0].download_url).toBe('https://example.com/sub-bill');
+    });
+
+    it('should apply sub merchant fund flow bill with all params', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: { download_bill_count: 1, download_bill_list: [] },
+      });
+
+      await service.applySubMerchantFundFlowBill({
+        sub_mchid: '1900000101',
+        bill_date: '2024-01-15',
+        account_type: 'BASIC',
+        algorithm: 'AEAD_AES_256_GCM',
+        tar_type: 'GZIP',
+      });
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/bill/sub-merchant-fundflowbill', {
+        sub_mchid: '1900000101',
+        bill_date: '2024-01-15',
+        account_type: 'BASIC',
+        algorithm: 'AEAD_AES_256_GCM',
+        tar_type: 'GZIP',
+      });
+    });
+  });
+
+  // ============= applyEcommerceFundFlowBill =============
+
+  describe('applyEcommerceFundFlowBill', () => {
+    it('should apply ecommerce fund flow bill', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: {
+          download_bill_count: 2,
+          download_bill_list: [
+            {
+              bill_sequence: 1,
+              hash_type: 'SHA1',
+              hash_value: 'def456',
+              download_url: 'https://example.com/ecom-bill-1',
+              encrypt_key: 'encrypted-key-1',
+              nonce: 'nonce1',
+            },
+            {
+              bill_sequence: 2,
+              hash_type: 'SHA1',
+              hash_value: 'ghi789',
+              download_url: 'https://example.com/ecom-bill-2',
+              encrypt_key: 'encrypted-key-2',
+              nonce: 'nonce2',
+            },
+          ],
+        },
+      });
+
+      const result = await service.applyEcommerceFundFlowBill({
+        bill_date: '2024-01-15',
+      });
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/ecommerce/bill/fundflowbill', {
+        bill_date: '2024-01-15',
+        account_type: undefined,
+        tar_type: undefined,
+        algorithm: undefined,
+      });
+      expect(result.data.download_bill_count).toBe(2);
+    });
+
+    it('should apply ecommerce fund flow bill with all params', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: { download_bill_count: 1, download_bill_list: [] },
+      });
+
+      await service.applyEcommerceFundFlowBill({
+        bill_date: '2024-01-15',
+        account_type: 'ALL',
+        tar_type: 'GZIP',
+        algorithm: 'AEAD_AES_256_GCM',
+      });
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/ecommerce/bill/fundflowbill', {
+        bill_date: '2024-01-15',
+        account_type: 'ALL',
+        tar_type: 'GZIP',
+        algorithm: 'AEAD_AES_256_GCM',
+      });
     });
   });
 });

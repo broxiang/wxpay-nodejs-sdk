@@ -216,6 +216,96 @@ describe('WxPayClient', () => {
     });
   });
 
+  // ========== resolvePublicKey 测试 ==========
+
+  describe('resolvePublicKey', () => {
+    it('should accept Buffer for wxpayPublicKey', () => {
+      const pubKeyPem = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      }).publicKey;
+
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        wxpayPublicKeyId: 'PUB_KEY_ID_001',
+        wxpayPublicKey: Buffer.from(pubKeyPem),
+      });
+
+      expect(client).toBeDefined();
+    });
+
+    it('should accept file path for wxpayPublicKey', () => {
+      const pubKeyPem = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      }).publicKey;
+
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wxpay-test-'));
+      const pubKeyPath = path.join(tmpDir, 'pubkey.pem');
+      fs.writeFileSync(pubKeyPath, pubKeyPem);
+
+      try {
+        const client = new WxPayClient({
+          mchid: '1900000100',
+          apiV3Key: '0123456789abcdef0123456789abcdef',
+          serialNo: CERT_SERIAL_NO,
+          privateKey,
+          wxpayPublicKeyId: 'PUB_KEY_ID_001',
+          wxpayPublicKey: pubKeyPath,
+        });
+
+        expect(client).toBeDefined();
+      } finally {
+        fs.unlinkSync(pubKeyPath);
+        fs.rmdirSync(tmpDir);
+      }
+    });
+
+    it('should fallback when wxpayPublicKey file not found', () => {
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        wxpayPublicKeyId: 'PUB_KEY_ID_001',
+        wxpayPublicKey: '/nonexistent/pubkey.pem',
+      });
+
+      expect(client).toBeDefined();
+    });
+  });
+
+  // ========== customFetch 测试 ==========
+
+  describe('customFetch', () => {
+    it('should use customFetch when provided', async () => {
+      const customFetch = vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ data: 'custom' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        enableResponseVerification: false,
+        customFetch: customFetch as unknown as typeof fetch,
+      });
+
+      await client.get('/v3/test');
+      expect(customFetch).toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+  });
+
   // ========== GET 请求测试 ==========
 
   describe('get', () => {
@@ -937,6 +1027,205 @@ describe('WxPayClient', () => {
         expect(err).toBeInstanceOf(WxPayError);
         if (err instanceof WxPayError) {
           expect(err.detail.code).toBe('PARSE_ERROR');
+        }
+      }
+    });
+  });
+
+  // ========== failover 错误分支测试 ==========
+
+  describe('failover error paths', () => {
+    it('should throw REQUEST_TIMEOUT on AbortError', async () => {
+      const timeoutFetch = vi.fn().mockImplementation(() => {
+        const abortError = new DOMException('The operation was aborted', 'AbortError');
+        return Promise.reject(abortError);
+      });
+
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        enableResponseVerification: false,
+        timeout: 100,
+        customFetch: timeoutFetch as unknown as typeof fetch,
+      });
+
+      try {
+        await client.get('/v3/test');
+        expect.unreachable('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(WxPayError);
+        if (err instanceof WxPayError) {
+          expect(err.detail.code).toBe('REQUEST_TIMEOUT');
+          expect(err.detail.message).toContain('请求超时');
+        }
+      }
+    });
+
+    it('should throw NETWORK_ERROR on network failure after all retries', async () => {
+      const failFetch = vi.fn().mockRejectedValue(new Error('Connection refused'));
+
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        enableResponseVerification: false,
+        customFetch: failFetch as unknown as typeof fetch,
+      });
+
+      try {
+        await client.get('/v3/test');
+        expect.unreachable('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(WxPayError);
+        if (err instanceof WxPayError) {
+          expect(err.detail.code).toBe('NETWORK_ERROR');
+          expect(err.detail.message).toBe('Connection refused');
+        }
+      }
+    });
+
+    it('should retry on network error and succeed on backup URL', async () => {
+      const successResponse = new Response(
+        JSON.stringify({ code: 'SUCCESS', data: { ok: true } }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+
+      const retryFetch = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('ECONNREFUSED'))
+        .mockResolvedValueOnce(successResponse);
+
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        enableResponseVerification: false,
+        customFetch: retryFetch as unknown as typeof fetch,
+      });
+
+      const result = await client.get('/v3/test');
+      expect(retryFetch).toHaveBeenCalledTimes(2);
+      expect(result.data).toEqual({ code: 'SUCCESS', data: { ok: true } });
+    });
+
+    it('should rethrow WxPayError immediately without retrying', async () => {
+      const errorFetch = vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ code: 'PARAM_ERROR', message: '参数错误' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        enableResponseVerification: false,
+        customFetch: errorFetch as unknown as typeof fetch,
+      });
+
+      try {
+        await client.get('/v3/test');
+        expect.unreachable('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(WxPayError);
+        if (err instanceof WxPayError) {
+          expect(err.detail.code).toBe('PARAM_ERROR');
+        }
+        expect(errorFetch).toHaveBeenCalledTimes(1);
+      }
+    });
+  });
+
+  // ========== createVerifier 测试 ==========
+
+  describe('createVerifier', () => {
+    it('should verify response signature when enabled', async () => {
+      const { publicKey, privateKey: serverKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      });
+
+      const timestamp = String(Math.floor(Date.now() / 1000));
+      const nonce = 'testnonce123';
+      const body = '{"code":"SUCCESS","data":{"ok":true}}';
+      const signString = `${timestamp}\n${nonce}\n${body}\n`;
+      const signer = crypto.createSign('RSA-SHA256');
+      signer.update(signString);
+      const signature = signer.sign(serverKey, 'base64');
+
+      const verifiedFetch = vi.fn().mockResolvedValue(
+        new Response(body, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Wechatpay-Timestamp': timestamp,
+            'Wechatpay-Nonce': nonce,
+            'Wechatpay-Serial': 'PUB_KEY_001',
+            'Wechatpay-Signature': signature,
+          },
+        }),
+      );
+
+      const verifyClient = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        wxpayPublicKeyId: 'PUB_KEY_001',
+        wxpayPublicKey: publicKey,
+        enableResponseVerification: true,
+        customFetch: verifiedFetch as unknown as typeof fetch,
+      });
+
+      const result = await verifyClient.get('/v3/test');
+      expect(result.data).toEqual({ code: 'SUCCESS', data: { ok: true } });
+    });
+
+    it('should throw when certificate not found for verification', async () => {
+      const noCertFetch = vi.fn().mockImplementation(() => {
+        const body = '{"ok":true}';
+        const timestamp = '1234567890';
+        const nonce = 'nonce';
+        return Promise.resolve(
+          new Response(body, {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Wechatpay-Timestamp': timestamp,
+              'Wechatpay-Nonce': nonce,
+              'Wechatpay-Serial': 'UNKNOWN_SERIAL',
+              'Wechatpay-Signature': 'sig',
+            },
+          }),
+        );
+      });
+
+      const client = new WxPayClient({
+        mchid: '1900000100',
+        apiV3Key: '0123456789abcdef0123456789abcdef',
+        serialNo: CERT_SERIAL_NO,
+        privateKey,
+        enableResponseVerification: true,
+        customFetch: noCertFetch as unknown as typeof fetch,
+      });
+
+      try {
+        await client.get('/v3/test');
+        expect.unreachable('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+        if (err instanceof Error) {
+          expect(err.message).toContain('未找到序列号为 UNKNOWN_SERIAL 的平台证书或公钥');
         }
       }
     });

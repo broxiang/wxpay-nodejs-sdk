@@ -8,6 +8,7 @@ import type {
   CompletePayScoreOrderRequest,
   ModifyPayScoreOrderRequest,
   SyncPayScoreOrderRequest,
+  CreateRefundRequest,
 } from '../src/types/index.js';
 
 // Mock the WxPayClient
@@ -440,6 +441,47 @@ describe('PayScoreService', () => {
       );
       expect(result.data.state).toBe('DONE');
       expect(result.data.collection?.state).toBe('USER_PAID');
+    });
+  });
+
+  // ============= applyRefund =============
+
+  describe('applyRefund', () => {
+    it('should apply refund via payscore', async () => {
+      const request: CreateRefundRequest = {
+        transaction_id: '4200001234567890',
+        out_refund_no: 'PSRF20240115001',
+        amount: { refund: 100, total: 100, currency: 'CNY' },
+      };
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: { refund_id: '5000001234567890', status: 'SUCCESS' },
+      });
+
+      const result = await service.applyRefund(request);
+      expect(mockClient.post).toHaveBeenCalledWith('/v3/refund/domestic/refunds', request);
+      expect(result.data.status).toBe('SUCCESS');
+    });
+  });
+
+  // ============= queryRefund =============
+
+  describe('queryRefund', () => {
+    it('should query refund by out refund no', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: {
+          refund_id: '5000001234567890',
+          out_refund_no: 'PSRF20240115001',
+          status: 'SUCCESS',
+        },
+      });
+
+      const result = await service.queryRefund('PSRF20240115001');
+      expect(mockClient.get).toHaveBeenCalledWith('/v3/refund/domestic/refunds/PSRF20240115001');
+      expect(result.data.status).toBe('SUCCESS');
     });
   });
 });

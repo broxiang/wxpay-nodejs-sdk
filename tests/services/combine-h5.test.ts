@@ -479,4 +479,27 @@ describe('CombineH5Service', () => {
       expect(result.data.success_time).toBeDefined();
     });
   });
+
+  // ============= applyAbnormalRefund =============
+
+  describe('applyAbnormalRefund', () => {
+    it('should apply abnormal refund', async () => {
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        headers: {},
+        data: { refund_id: '50000000382019052709732678870', status: 'PROCESSING' },
+      });
+
+      const result = await service.applyAbnormalRefund('REFUND_001', {
+        type: 'USER_BANK_CARD',
+        bank_account: '622****8888',
+        real_name: '测试用户',
+      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/v3/refund/domestic/refunds/REFUND_001/apply-abnormal-refund',
+        { type: 'USER_BANK_CARD', bank_account: '622****8888', real_name: '测试用户' },
+      );
+      expect(result.data.status).toBe('PROCESSING');
+    });
+  });
 });

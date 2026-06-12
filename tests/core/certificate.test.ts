@@ -346,5 +346,45 @@ describe('CertificateManager', () => {
       expect(onError).toHaveBeenCalled();
       manager.stopAutoUpdate();
     });
+
+    it('should stop auto update when timer is null', () => {
+      manager.stopAutoUpdate();
+      // should not throw
+    });
+  });
+
+  // ============= isCombinedMode =============
+
+  describe('isCombinedMode', () => {
+    it('should return false when only certificates exist', () => {
+      manager.setPublicKey('CERT001', publicKey);
+      expect(manager.isCombinedMode()).toBe(false);
+    });
+
+    it('should return false when only wxpay public key exists', () => {
+      manager.setWxPayPublicKey('PUB_KEY_001', publicKey);
+      expect(manager.isCombinedMode()).toBe(false);
+    });
+
+    it('should return true when both certificates and wxpay public key exist', () => {
+      manager.setPublicKey('CERT001', publicKey);
+      manager.setWxPayPublicKey('PUB_KEY_001', publicKey);
+      expect(manager.isCombinedMode()).toBe(true);
+    });
+  });
+
+  // ============= combined mode fallback =============
+
+  describe('combined mode fallback', () => {
+    it('should fallback to wxpay public key when certificate not found', () => {
+      manager.setWxPayPublicKey('PUB_KEY_001', publicKey);
+      const result = manager.getPublicKey('NON_EXISTENT_CERT');
+      expect(result).toBe(publicKey);
+    });
+
+    it('should return null when no cert and no wxpay public key', () => {
+      const result = manager.getPublicKey('NON_EXISTENT_CERT');
+      expect(result).toBeNull();
+    });
   });
 });
