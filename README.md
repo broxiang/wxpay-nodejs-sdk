@@ -1,6 +1,6 @@
 # wxpay-nodejs-sdk
 
-[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/broxiang/wxpay-nodejs-sdk)
+[![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)](https://github.com/broxiang/wxpay-nodejs-sdk)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
 
