@@ -1,6 +1,6 @@
 {
   "name": "wxpay-nodejs-sdk",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "微信支付 API V3 Node.js SDK",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
