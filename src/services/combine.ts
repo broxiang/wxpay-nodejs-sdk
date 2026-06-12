@@ -1,19 +1,6 @@
 import type { WxPayResponse } from '../types/index.js';
-import type {
-  CreateCombineOrderRequest,
-  CreateCombineOrderResponse,
-  QueryCombineOrderParams,
-  QueryCombineOrderResponse,
-  CloseCombineOrderParams,
-  CloseCombineOrderRequest,
-  CreateRefundRequest,
-  CreateRefundResponse,
-  ApplyAbnormalRefundRequest,
-  ApplyAbnormalRefundResponse,
-  QueryRefundParams,
-  QueryRefundResponse,
-} from '../types/index.js';
-import { WxPayClient } from '../core/client.js';
+import type { CreateCombineOrderRequest, CreateCombineOrderResponse } from '../types/index.js';
+import { BaseCombineService } from './base-combine.js';
 
 /**
  * 合单支付服务
@@ -25,6 +12,9 @@ import { WxPayClient } from '../core/client.js';
  * - 申请退款
  * - 查询退款
  * - 申请异常退款
+ * - 申请交易账单
+ * - 申请资金账单
+ * - 下载账单
  *
  * 合单支付允许一笔支付中包含 2-10 个子单，适用于多商户场景。
  * 各子单商户号需与合单发起方 APPID 绑定。
@@ -36,13 +26,7 @@ import { WxPayClient } from '../core/client.js';
  * @see https://pay.weixin.qq.com/doc/v3/merchant/4013421222 (查询合单订单)
  * @see https://pay.weixin.qq.com/doc/v3/merchant/4013421225 (关闭合单订单)
  */
-export class CombineService {
-  private readonly client: WxPayClient;
-
-  constructor(client: WxPayClient) {
-    this.client = client;
-  }
-
+export class CombineService extends BaseCombineService {
   /**
    * JSAPI 合单下单
    *
@@ -62,98 +46,5 @@ export class CombineService {
     request: CreateCombineOrderRequest,
   ): Promise<WxPayResponse<CreateCombineOrderResponse>> {
     return this.client.post<CreateCombineOrderResponse>('/v3/combine-transactions/jsapi', request);
-  }
-
-  /**
-   * 查询合单订单
-   *
-   * 通过合单商户订单号查询合单订单的支付状态及各子单详情。
-   *
-   * 订单状态（sub_orders[].trade_state）：
-   * - SUCCESS：支付成功（终态）
-   * - NOTPAY：未支付
-   * - CLOSED：已关闭（终态）
-   *
-   * 注意：请勿使用非合单支付的查单接口查询合单订单。
-   *
-   * @see https://pay.weixin.qq.com/doc/v3/merchant/4013421222
-   */
-  async queryOrderById(
-    params: QueryCombineOrderParams,
-  ): Promise<WxPayResponse<QueryCombineOrderResponse>> {
-    return this.client.get<QueryCombineOrderResponse>(
-      `/v3/combine-transactions/out-trade-no/${params.combineOutTradeNo}`,
-    );
-  }
-
-  /**
-   * 关闭合单订单
-   *
-   * 对于未支付的合单订单，商户可通过此接口关闭订单。
-   * 关单后，所有子单状态从未支付（NOTPAY）流转为已关闭（CLOSED）。
-   *
-   * 关键约束：
-   * - 只能整单关闭，不支持关闭部分子单
-   * - combine_appid、sub_orders 中的 mchid 和 out_trade_no 必须与下单时完全一致
-   * - 仅支持未支付状态的订单
-   *
-   * @see https://pay.weixin.qq.com/doc/v3/merchant/4013421225
-   */
-  async closeOrder(
-    params: CloseCombineOrderParams,
-    request: CloseCombineOrderRequest,
-  ): Promise<WxPayResponse> {
-    return this.client.post(
-      `/v3/combine-transactions/out-trade-no/${params.combineOutTradeNo}/close`,
-      request,
-    );
-  }
-
-  /**
-   * 申请退款
-   *
-   * 当子单状态为支付成功（SUCCESS）时，商户可通过此接口对子单申请退款。
-   * 仅支持支付成功后 1 年内的订单。
-   *
-   * 注意：合单支付的订单无法通过合单总单号 combine_out_trade_no 退款，
-   * 需要传入子单的 transaction_id 或 out_trade_no。
-   *
-   * @see https://pay.weixin.qq.com/doc/v3/merchant/4013421249
-   */
-  async createRefund(request: CreateRefundRequest): Promise<WxPayResponse<CreateRefundResponse>> {
-    return this.client.post<CreateRefundResponse>('/v3/refund/domestic/refunds', request);
-  }
-
-  /**
-   * 查询退款单
-   *
-   * 通过商户退款单号查询退款状态。
-   *
-   * @see https://pay.weixin.qq.com/doc/v3/merchant/4013421261
-   */
-  async queryRefund(params: QueryRefundParams): Promise<WxPayResponse<QueryRefundResponse>> {
-    return this.client.get<QueryRefundResponse>(
-      `/v3/refund/domestic/refunds/${params.outRefundNo}`,
-    );
-  }
-
-  /**
-   * 申请异常退款
-   *
-   * 当退款状态为 ABNORMAL 时，可通过此接口发起异常退款处理。
-   * 支持退款至用户银行卡或退款至交易商户银行账户两种方式。
-   *
-   * @param refundId - 微信支付退款单号
-   * @param request - 异常退款请求参数
-   * @see https://pay.weixin.qq.com/doc/v3/merchant/4013421269
-   */
-  async applyAbnormalRefund(
-    refundId: string,
-    request: ApplyAbnormalRefundRequest,
-  ): Promise<WxPayResponse<ApplyAbnormalRefundResponse>> {
-    return this.client.post<ApplyAbnormalRefundResponse>(
-      `/v3/refund/domestic/refunds/${refundId}/apply-abnormal-refund`,
-      request,
-    );
   }
 }
